@@ -10,7 +10,7 @@ OpenSCAP/OVAL**. The script is correct **iff** the rule flips `fail → pass`. N
 reference-script diffing — a compliance scanner is the oracle.
 
 > ### 🏁 Headline result — Claude Opus 4.8
-> **89% (143/161) of applicable server-safe RHEL-8 STIG rules remediated correctly**, verified
+> **88.8% (143/161) of applicable server-safe RHEL-8 STIG rules remediated correctly**, verified
 > functionally via OpenSCAP/OVAL. Failures were almost never coding errors — they were *value/mechanism
 > mismatches* (e.g. the rule text says "≥ 5000 hashing rounds" but the STIG profile secretly requires
 > **100000**). Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
@@ -46,15 +46,18 @@ Host: AlmaLinux 8 (RHEL-8 binary-compatible, headless server).
 | **Server config + kernel** (packages, PAM, mount, GRUB, sysctl, kernel-modules, coredump, rsyslog, chronyd, fapolicyd, file-perms, sssd, usbguard) | **106** | **117** | **90.6%** |
 | **Audit rules** (`audit_rules_*`) | **37** | **44** | **84.1%** |
 | **→ Combined server-safe (headline)** | **143** | **161** | **88.8%** |
-| sshd config | 8 | 15 | 53% *(partly crypto-contaminated)* |
-| Crypto / FIPS (access-breakers) | 0 | 5 | 0% *(sever SSH; need snapshot isolation)* |
+| sshd config | 8 | 15 | 53.3% *(partly crypto-contaminated)* |
+| Crypto / FIPS (access-breakers) | 0 | 4 | 0% *(+1 unverified; sever SSH, need snapshot isolation)* |
 | Not applicable (GUI / no hardware) | — | 17 | excluded |
-| **All verified applicable** | **151** | **181** | **83.4%** |
+| **All verified applicable** | **151** | **180** | **83.9%** |
 
-**197 of 200 generated rules were functionally verified.** Only the single `gnutls` crypto rule is
-unverified (it severs SSH access and needs a snapshot-revert VM). The 32 reboot-required sysctl/kernel
-rules were verified in a dedicated apply → reboot → rescan run (**28/32 pass**), then independently
-re-confirmed by a full-profile `oscap` scan.
+Counting is exact and reproducible from `benchmark/results_opus_full.jsonl` (198 rows). Of the **200**
+scripts Claude generated, **198 were scored** and **197 functionally verified** — only the single
+`gnutls` crypto rule is unverified (it severs SSH access and needs a snapshot-revert VM). The 2 unscored
+scripts (`xwindows_remove_packages`, `xwindows_runlevel_target`) target X11/GUI and are not applicable to
+a headless server. "All verified applicable" (151/180) excludes the 17 not-applicable rows and the 1
+unverified rule. The 32 reboot-required sysctl/kernel rules were verified in a dedicated apply → reboot →
+rescan run (**28/32 pass**), then independently re-confirmed by a full-profile `oscap` scan.
 
 **Core finding:** Claude rarely fails to *write* a working hardening script. It fails on the gap between
 "functionally hardened" and "hardened the exact way this OVAL check verifies" — a non-obvious required
@@ -80,6 +83,7 @@ scanner expected one specific value/mechanism. Read the full failure analysis in
 | **`benchmark/score_remediations.py`** | **The grader.** Runs on the target host: pre-scan → run the model's script → post-scan; `passed = (post == pass)`. Resumable. Pure stdlib, **Python 3.6-compatible** (runs on stock RHEL-8 python). |
 | **`benchmark/run_benchmark.sh`** | One-command orchestrator: scores non-reboot rules, applies reboot rules, does one controlled reboot, auto-rescans on boot. |
 | **`benchmark/results_opus_full.jsonl`** | Per-rule machine-readable results (198 rows) behind the table above. |
+| **`benchmark/compute_scores.py`** | Recomputes every number in the results table from `results_opus_full.jsonl` (`python3 benchmark/compute_scores.py`) — so every figure is reviewer-verifiable. |
 | **`benchmark/RESULTS.md`** | The written analysis: buckets, failure clusters, caveats, the paper one-liner. |
 | **`benchmark/sample_*.md`** | Human-readable samples of generated prompts and predictions (eyeball the dataset quality without running anything). |
 | **`benchmark/test_generate*.py`** | Cheap synchronous dry-runs of the prompt generators (a few rules, no batch job). |
@@ -193,7 +197,7 @@ rules are handled explicitly by the `apply`/`rescan` phases.
 
 ## Caveats (read before quoting a number)
 
-1. **Crypto/FIPS rules (0/5) are an infrastructure artifact, not a model failure.** They restrict SSH
+1. **Crypto/FIPS rules (0/4 verified, +1 unverified) are an infrastructure artifact, not a model failure.** They restrict SSH
    ciphers/algorithms and lock you out of a single live host mid-run. Scoring them fairly needs a local
    libvirt/QEMU VM with **per-rule snapshot revert** (future work) — that's also the only rigorous way to
    eliminate cross-rule contamination.

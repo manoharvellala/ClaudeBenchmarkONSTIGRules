@@ -4,15 +4,17 @@
 **Test environment:** AlmaLinux 8 (RHEL-8 binary-compatible), DigitalOcean, headless server
 **Scanner / oracle:** OpenSCAP 1.3.x, `ssg-almalinux8-ds.xml` (SSG 0.1.81), profile `stig`
 **Prompts:** "hide-the-mechanism" blind variant (security requirement only; no file/value/command leaked)
-**Coverage:** 200 rules generated; **197 verified** (across 3 AlmaLinux-8 boxes — each crypto remediation
-eventually severed access, so runs were split). Only the 1 crypto `gnutls` rule is unverified.
-Raw merged data: `results_opus_full.jsonl`.
+**Coverage:** 200 scripts generated; **198 scored**, **197 functionally verified** (across 3 AlmaLinux-8
+boxes — each crypto remediation eventually severed access, so runs were split). Only the 1 crypto `gnutls`
+rule is unverified; the 2 unscored scripts (`xwindows_remove_packages`, `xwindows_runlevel_target`) are
+X11/GUI rules N/A on a headless server. Raw data: `results_opus_full.jsonl` (198 rows) — every number
+below is recomputable from it.
 
 ---
 
 ## Headline result
 
-> **Claude Opus 4.8 correctly remediated 89% (143/161) of applicable server-safe rules**
+> **Claude Opus 4.8 correctly remediated 88.8% (143/161) of applicable server-safe rules**
 > (config + audit + kernel hardening), verified functionally via OpenSCAP/OVAL (`fail` before, `pass` after).
 
 ## Scores by bucket (verified rules)
@@ -22,10 +24,13 @@ Raw merged data: `results_opus_full.jsonl`.
 | **Server config + kernel** (packages, PAM, mount, GRUB, sysctl, kernel-modules, coredump, rsyslog, chronyd, fapolicyd, file-perms, sssd, usbguard) | **106** | **117** | **90.6%** |
 | **Audit rules** (`audit_rules_*`) | **37** | **44** | **84.1%** |
 | **→ Combined server-safe (headline)** | **143** | **161** | **88.8%** |
-| sshd config | 8 | 15 | 53% *(partly contaminated — see caveats)* |
-| Crypto / FIPS (access-breakers) | 0 | 5 | 0% *(reboot/isolation needed)* |
+| sshd config | 8 | 15 | 53.3% *(partly contaminated — see caveats)* |
+| Crypto / FIPS (access-breakers) | 0 | 4 | 0% *(+1 unverified `gnutls`; reboot/isolation needed)* |
 | Not applicable (GUI/no-hardware) | — | 17 | excluded |
-| **All verified applicable** | **151** | **181** | **83.4%** |
+| **All verified applicable** | **151** | **180** | **83.9%** |
+
+Denominators: 198 scored rows = 117 + 44 + 15 + 4 (verified applicable = 180) + 17 N/A + 1 unverified.
+"All verified applicable" = 151/180; it excludes the 17 N/A rows and the 1 unverified `gnutls` rule.
 
 The 32 reboot-required **sysctl/kernel** rules were verified in a dedicated 3rd run (apply → reboot → rescan):
 **28/32 passed (87.5%)** — all IPv6 redirect/RA/forwarding sysctls, kernel-module blacklists, dmesg_restrict,
@@ -68,9 +73,10 @@ kexec, bpf, randomize_va_space. The 4 misses: `sysctl_net_ipv4_conf_all_forwardi
 
 ## Caveats
 
-1. **Crypto/FIPS (0/5) is an infrastructure artifact, not a model failure.** Crypto-policy / FIPS / gnutls
-   remediations **sever SSH/console access** and require reboot; on a single live host they lock the box
-   (this happened on multiple runs). Only the 1 `gnutls` rule remains unverified. The 32 reboot-required
+1. **Crypto/FIPS (0/4 verified, +1 unverified) is an infrastructure artifact, not a model failure.**
+   Crypto-policy / FIPS / gnutls remediations **sever SSH/console access** and require reboot; on a single
+   live host they lock the box (this happened on multiple runs). 4 of the 5 were scored (all fail under the
+   contamination/lockout conditions); only the 1 `gnutls` rule remains unverified. The 32 reboot-required
    sysctl/kernel rules were finally verified on a dedicated 3rd box (apply → reboot → auto-rescan) → 28/32 pass.
 2. **sshd (53%) is partly contaminated.** In the first run the crypto rules ran *before* the sshd rules and
    broke sshd's config, causing `sshd -t` errors. The second (clean) run's sshd rules passed 3/4. A
@@ -81,7 +87,7 @@ kexec, bpf, randomize_va_space. The 4 misses: `sysctl_net_ipv4_conf_all_forwardi
 
 ## One line for the paper
 
-> On a headless RHEL-8 server, Claude Opus 4.8 correctly remediated **89% (143/161)** of applicable
+> On a headless RHEL-8 server, Claude Opus 4.8 correctly remediated **88.8% (143/161)** of applicable
 > server-safe STIG rules (config + audit + kernel hardening), verified functionally via OpenSCAP/OVAL.
 > Failures concentrated in `login.defs` value/mechanism mismatches and audit-rule key-string errors — not
 > coding errors. Crypto-policy/FIPS rules sever management access and require snapshot-isolated evaluation
