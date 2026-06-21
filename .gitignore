@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+# live scan output produced during a run (the *published* results are benchmark/results_opus_*.jsonl)
+/results.jsonl
+benchmark/results.jsonl
+benchmark.log
+run.out
+rescan.out
+full-scan.log
+*.html
+.env

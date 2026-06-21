@@ -1,0 +1,4 @@
+# Inference / dataset-generation only (needs Python 3.8+).
+# The scorer (score_remediations.py) has NO pip dependencies and runs on the
+# stock Python 3.6 that ships with RHEL 8 / AlmaLinux 8 / Rocky 8.
+anthropic>=0.111.0
