@@ -14,6 +14,8 @@ reference-script diffing — a compliance scanner is the oracle.
 > | Model | Combined Server-Safe | All Verified Applicable |
 > |---|---|---|
 > | **Claude Opus 4.8** | **88.8%** (143/161) | **83.9%** (151/180) |
+> | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
+> | Qwen2.5-Coder-14B-Instruct | *(scoring in progress)* | *(scoring in progress)* |
 > | Qwen2.5-Coder-7B-Instruct | 16.3% (20/123) | 17.5% (24/137) |
 >
 > Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
@@ -45,19 +47,21 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 ### Model Comparison
 
-| Bucket | Claude Opus 4.8 | Qwen2.5-Coder-7B |
-|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 19/79 = **24.1%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 1/44 = **2.3%** |
-| **→ Combined server-safe** | **143/161 = 88.8%** | **20/123 = 16.3%** |
-| sshd config | 8/15 = 53.3% | 4/14 = 28.6% |
-| Crypto / FIPS | 0/4 = 0% | — |
-| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%** | **24/137 = 17.5%** |
+| Bucket | Claude Opus 4.8 | GPT-4o | Qwen2.5-Coder-14B | Qwen2.5-Coder-7B |
+|---|---|---|---|---|
+| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | *(pending)* | 19/79 = **24.1%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | *(pending)* | 1/44 = **2.3%** |
+| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | *(pending)* | **20/123 = 16.3%** |
+| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | *(pending)* | 4/14 = 28.6% |
+| Crypto / FIPS | 0/4 = 0% | — | — | — |
+| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
+| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | *(pending)* | **24/137 = 17.5%** |
 
-**Key finding:** Claude Opus 4.8 scores **5.4× higher** than Qwen2.5-Coder-7B on this benchmark
-(88.8% vs 16.3%). The audit rules category shows the starkest gap — Qwen essentially cannot write
-correct `auditd` rules (2.3% vs 84.1%).
+**Key findings:**
+- Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
+- GPT-4o scores **65.7%** — solid mid-tier; notably best on sshd (71.4%) but weaker on audit rules (62.1%).
+- Qwen2.5-Coder-7B scores **16.3%** — nearly unable to write correct `auditd` rules (2.3%).
+- Claude scores **1.35× higher** than GPT-4o and **5.4× higher** than Qwen 7B on combined server-safe.
 
 Scanner: OpenSCAP 1.3.14 · SSG 0.1.81 `stig` profile · Host: AlmaLinux 8 (RHEL-8
 binary-compatible, headless server).
@@ -98,6 +102,17 @@ non-compliant because the scanner expected one specific value/mechanism.
 | **`benchmark/RESULTS.md`** | Full written analysis: buckets, failure clusters, caveats. |
 | **`benchmark/BENCHMARK_COMPOSITION.md`** | Rule taxonomy: 14 functional domains, severity distribution, NIST mapping, shell-scripting skill profile. |
 | **`stig-results.xml`** | Source of truth: OpenSCAP scan of an unhardened RHEL-8 host under the DISA STIG profile. Everything downstream is derived from this file. |
+
+### OpenAI model inference (`openai_models/`)
+
+Standalone folder to benchmark OpenAI models. No GPU needed — runs from any machine with an API key.
+
+| Path | What it is |
+|---|---|
+| **`openai_models/run_inference_openai.py`** | Inference client for any OpenAI model (`gpt-4o`, `o4-mini`, `o3`). Resumable, 3-retry, extracts bash blocks. o-series models use `reasoning_effort` parameter. |
+| **`openai_models/dataset.jsonl`** | The 215 benchmark prompts (same as `benchmark/dataset.jsonl`). |
+| **`openai_models/predictions_gpt4o.jsonl`** | GPT-4o predictions (215 rules). |
+| **`openai_models/requirements.txt`** | `openai>=1.0.0` |
 
 ### Open-source model inference (`qwen/`)
 
@@ -143,7 +158,17 @@ python3 benchmark/run_inference.py \
 
 Swap `--model` for any Anthropic model (`claude-sonnet-4-6`, `claude-haiku-4-5-…`).
 
-### Stage 2b — Inference with an open-source model *(needs a GPU box)*
+### Stage 2b — Inference with an OpenAI model *(needs OpenAI API key)*
+
+```bash
+cd openai_models/
+pip install -r requirements.txt
+export OPENAI_API_KEY=sk-...
+python3 run_inference_openai.py --model gpt-4o --out predictions_gpt4o.jsonl
+# supports gpt-4o, o4-mini, o3 — resumable, 3-retry logic
+```
+
+### Stage 2c — Inference with an open-source model *(needs a GPU box)*
 
 On a box with a 24 GB+ NVIDIA GPU (e.g. RunPod A100):
 

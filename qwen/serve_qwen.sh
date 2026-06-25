@@ -14,8 +14,10 @@ if ! command -v vllm >/dev/null 2>&1; then
   pip install vllm
 fi
 
+export HF_HOME="${HF_HOME:-/workspace/hf}"
+export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-1}"
 export VLLM_ENGINE_READY_TIMEOUT_S="${VLLM_ENGINE_READY_TIMEOUT_S:-1800}"
-echo "Serving $MODEL on port $PORT (max-model-len=$MAXLEN, timeout=${VLLM_ENGINE_READY_TIMEOUT_S}s)..."
+echo "Serving $MODEL on port $PORT (max-model-len=$MAXLEN, timeout=${VLLM_ENGINE_READY_TIMEOUT_S}s, HF_HOME=$HF_HOME)..."
 exec vllm serve "$MODEL" \
   --port "$PORT" \
   --max-model-len "$MAXLEN" \
