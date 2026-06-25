@@ -1,4 +1,4 @@
-# Claude Benchmark on STIG Rules
+# STIG-LLM Benchmark
 
 **A reproducible benchmark that measures how well an LLM can write real Linux security-hardening
 scripts — graded functionally, not by string-matching.**
@@ -9,122 +9,130 @@ remediation script, then **run that script on a real RHEL-8-family host and re-s
 OpenSCAP/OVAL**. The script is correct **iff** the rule flips `fail → pass`. No human judgement, no
 reference-script diffing — a compliance scanner is the oracle.
 
-> ### 🏁 Headline result — Claude Opus 4.8
-> **88.8% (143/161) of applicable server-safe RHEL-8 STIG rules remediated correctly**, verified
-> functionally via OpenSCAP/OVAL. Failures were almost never coding errors — they were *value/mechanism
-> mismatches* (e.g. the rule text says "≥ 5000 hashing rounds" but the STIG profile secretly requires
-> **100000**). Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
+> ### Headline Results
+>
+> | Model | Combined Server-Safe | All Verified Applicable |
+> |---|---|---|
+> | **Claude Opus 4.8** | **88.8%** (143/161) | **83.9%** (151/180) |
+> | Qwen2.5-Coder-7B-Instruct | 16.3% (20/123) | 17.5% (24/137) |
+>
+> Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
 
-This is the same evaluation pattern as **HumanEval / SWE-bench**:
+---
+
+## Pipeline
 
 ```
-                                              ┌─ ANTHROPIC_API_KEY ─┐
- stig-results.xml ──build_dataset──▶ dataset.jsonl ──run_inference──▶ predictions_<model>.jsonl
-  (an OpenSCAP STIG    (NL task + hidden    (215 leak-free   (the model writes    (one Bash script
-   scan of RHEL 8)      answer + OVAL id)     prompts)         the Bash)            per rule)
-                                                                      │
-                                            score_remediations.py / run_benchmark.sh
-                                          (run each script on AlmaLinux 8, re-check OVAL)
-                                                                      ▼
-                                              results_opus_full.jsonl  +  RESULTS.md
-                                            (per-rule pass/fail = did fail→pass flip?)
+                                          ┌─ ANTHROPIC_API_KEY ─┐
+stig-results.xml ──build_dataset──▶ dataset.jsonl ──run_inference──▶ predictions_<model>.jsonl
+ (an OpenSCAP STIG    (NL task + hidden    (215 leak-free   (the model writes    (one Bash script
+  scan of RHEL 8)      answer + OVAL id)     prompts)         the Bash)            per rule)
+                                                                    │
+                                          score_remediations.py / run_benchmark.sh
+                                        (run each script on AlmaLinux 8, re-check OVAL)
+                                                                    ▼
+                                            results_<model>.jsonl  +  RESULTS.md
+                                          (per-rule pass/fail = did fail→pass flip?)
 ```
 
 The key design choice: **decouple generation from execution.** One stage produces scripts (needs an
-API key); a separate stage runs and grades them on a throwaway VM (needs only OpenSCAP, no API key).
-That makes runs cheap to repeat and lets you benchmark any model by swapping one flag.
+API key or GPU); a separate stage runs and grades them on a throwaway VM (needs only OpenSCAP, no
+API key / GPU). That makes runs cheap to repeat and lets you benchmark any model by swapping one flag.
 
 ---
 
 ## Results
 
-Model under test: `claude-opus-4-8` · Scanner: OpenSCAP 1.3 with SSG 0.1.81 `stig` profile ·
-Host: AlmaLinux 8 (RHEL-8 binary-compatible, headless server).
+### Model Comparison
 
-| Bucket | Passed | Total | Rate |
-|---|---:|---:|---:|
-| **Server config + kernel** (packages, PAM, mount, GRUB, sysctl, kernel-modules, coredump, rsyslog, chronyd, fapolicyd, file-perms, sssd, usbguard) | **106** | **117** | **90.6%** |
-| **Audit rules** (`audit_rules_*`) | **37** | **44** | **84.1%** |
-| **→ Combined server-safe (headline)** | **143** | **161** | **88.8%** |
-| sshd config | 8 | 15 | 53.3% *(partly crypto-contaminated)* |
-| Crypto / FIPS (access-breakers) | 0 | 4 | 0% *(+1 unverified; sever SSH, need snapshot isolation)* |
-| Not applicable (GUI / no hardware) | — | 17 | excluded |
-| **All verified applicable** | **151** | **180** | **83.9%** |
+| Bucket | Claude Opus 4.8 | Qwen2.5-Coder-7B |
+|---|---|---|
+| Server config + kernel | 106/117 = **90.6%** | 19/79 = **24.1%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 1/44 = **2.3%** |
+| **→ Combined server-safe** | **143/161 = 88.8%** | **20/123 = 16.3%** |
+| sshd config | 8/15 = 53.3% | 4/14 = 28.6% |
+| Crypto / FIPS | 0/4 = 0% | — |
+| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded |
+| **All verified applicable** | **151/180 = 83.9%** | **24/137 = 17.5%** |
 
-Counting is exact and reproducible from `benchmark/results_opus_full.jsonl` (198 rows). Of the **200**
-scripts Claude generated, **198 were scored** and **197 functionally verified** — only the single
-`gnutls` crypto rule is unverified (it severs SSH access and needs a snapshot-revert VM). The 2 unscored
-scripts (`xwindows_remove_packages`, `xwindows_runlevel_target`) target X11/GUI and are not applicable to
-a headless server. "All verified applicable" (151/180) excludes the 17 not-applicable rows and the 1
-unverified rule. The 32 reboot-required sysctl/kernel rules were verified in a dedicated apply → reboot →
-rescan run (**28/32 pass**), then independently re-confirmed by a full-profile `oscap` scan.
+**Key finding:** Claude Opus 4.8 scores **5.4× higher** than Qwen2.5-Coder-7B on this benchmark
+(88.8% vs 16.3%). The audit rules category shows the starkest gap — Qwen essentially cannot write
+correct `auditd` rules (2.3% vs 84.1%).
 
-**Core finding:** Claude rarely fails to *write* a working hardening script. It fails on the gap between
-"functionally hardened" and "hardened the exact way this OVAL check verifies" — a non-obvious required
-value, a specific knob among valid alternatives (`login.defs` vs `pam`), or an exact audit key string.
-This mirrors real compliance: a correctly-hardened box can still be flagged non-compliant because the
-scanner expected one specific value/mechanism. Read the full failure analysis in
-**[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
+Scanner: OpenSCAP 1.3.14 · SSG 0.1.81 `stig` profile · Host: AlmaLinux 8 (RHEL-8
+binary-compatible, headless server).
+
+### Claude Opus 4.8 — Full Breakdown
+
+Counting is exact and reproducible from `benchmark/results_opus_full.jsonl` (198 rows). Of the
+**200** scripts Claude generated, **198 were scored** and **197 functionally verified** — only the
+single `gnutls` crypto rule is unverified (it severs SSH access and needs a snapshot-revert VM). The
+2 unscored scripts (`xwindows_remove_packages`, `xwindows_runlevel_target`) target X11/GUI and are
+not applicable to a headless server. The 32 reboot-required sysctl/kernel rules were verified in a
+dedicated apply → reboot → rescan run (**28/32 pass**), then independently re-confirmed by a
+full-profile `oscap` scan.
+
+**Core finding:** Claude rarely fails to *write* a working hardening script. It fails on the gap
+between "functionally hardened" and "hardened the exact way this OVAL check verifies" — a
+non-obvious required value, a specific knob among valid alternatives (`login.defs` vs `pam`), or an
+exact audit key string. This mirrors real compliance: a correctly-hardened box can still be flagged
+non-compliant because the scanner expected one specific value/mechanism.
 
 ---
 
 ## What's in this repo
 
+### Core benchmark (`benchmark/`)
+
 | Path | What it is |
 |---|---|
-| **`stig-results.xml`** | The source of truth: an OpenSCAP scan of an unhardened RHEL-8 host under the DISA STIG profile. Fully rendered (no templating) — per rule it contains the title/description/rationale, the reference fix script, the OVAL check id, and the initial pass/fail. Everything downstream is derived from this one file. |
-| **`benchmark/build_dataset.py`** | Parses `stig-results.xml` → `dataset.jsonl`. With `--generate` it authors the **leak-free** task prompts via the Anthropic API (states the requirement, hides file paths / directive names / commands). A programmatic `leaked()` check flags any prompt that accidentally reveals the mechanism. |
-| **`benchmark/build_dataset_with_remediation.py`** | A *fix-aware* variant where the prompt author is allowed to see the reference script. More complete prompts, but leakier — kept for comparison only. |
 | **`benchmark/dataset.jsonl`** | **The benchmark itself.** 233 rows (215 with prompts). Each row = `prompt`, hidden `reference_bash`, hidden `oval_check_id`, `stig_id`, `severity`, `reboot_required`, `initial_state`. |
-| **`benchmark/dataset_with_remediation.jsonl`** | The fix-aware dataset (comparison only). |
-| **`benchmark/run_inference.py`** | Feeds each `prompt` to the model under test, extracts the ```bash``` block → `predictions_<model>.jsonl`. Resumable; the *only* part that needs an API key. |
+| **`benchmark/build_dataset.py`** | Parses `stig-results.xml` → `dataset.jsonl`. With `--generate` authors **leak-free** task prompts via the Anthropic API. |
+| **`benchmark/run_inference.py`** | Feeds each `prompt` to any Anthropic model, extracts the bash block → `predictions_<model>.jsonl`. The only part that needs an API key. |
 | **`benchmark/predictions_opus.jsonl`** | Claude Opus 4.8's 200 generated scripts (the run scored here). |
-| **`benchmark/predictions_kernel.jsonl`** | The 32 reboot-required sysctl/kernel scripts (scored via the reboot phase). |
-| **`benchmark/score_remediations.py`** | **The grader.** Runs on the target host: pre-scan → run the model's script → post-scan; `passed = (post == pass)`. Resumable. Pure stdlib, **Python 3.6-compatible** (runs on stock RHEL-8 python). |
-| **`benchmark/run_benchmark.sh`** | One-command orchestrator: scores non-reboot rules, applies reboot rules, does one controlled reboot, auto-rescans on boot. |
-| **`benchmark/results_opus_full.jsonl`** | Per-rule machine-readable results (198 rows) behind the table above. |
-| **`benchmark/compute_scores.py`** | Recomputes every number in the results table from `results_opus_full.jsonl` (`python3 benchmark/compute_scores.py`) — so every figure is reviewer-verifiable. |
-| **`benchmark/RESULTS.md`** | The written analysis: buckets, failure clusters, caveats, the paper one-liner. |
-| **`benchmark/sample_*.md`** | Human-readable samples of generated prompts and predictions (eyeball the dataset quality without running anything). |
-| **`benchmark/test_generate*.py`** | Cheap synchronous dry-runs of the prompt generators (a few rules, no batch job). |
-| **`products/rhel8/controls/stig_rhel8.yml`** | The RHEL-8 STIG control→rule mapping, from ComplianceAsCode, for cross-referencing STIG IDs. |
+| **`benchmark/predictions_kernel.jsonl`** | The 32 reboot-required sysctl/kernel scripts (scored via reboot phase). |
+| **`benchmark/score_remediations.py`** | **The grader.** Runs on the target host: pre-scan → run script → post-scan; `passed = (post == pass)`. Python 3.6-compatible (runs on stock RHEL-8). |
+| **`benchmark/run_benchmark.sh`** | One-command orchestrator: normal rules + apply/reboot/rescan for kernel rules. |
+| **`benchmark/results_opus_full.jsonl`** | Per-rule results (198 rows) for Claude Opus 4.8. |
+| **`benchmark/compute_scores.py`** | Recomputes every number in the results table from any `results_*.jsonl` — reviewer-verifiable. |
+| **`benchmark/RESULTS.md`** | Full written analysis: buckets, failure clusters, caveats. |
+| **`benchmark/BENCHMARK_COMPOSITION.md`** | Rule taxonomy: 14 functional domains, severity distribution, NIST mapping, shell-scripting skill profile. |
+| **`stig-results.xml`** | Source of truth: OpenSCAP scan of an unhardened RHEL-8 host under the DISA STIG profile. Everything downstream is derived from this file. |
+
+### Open-source model inference (`qwen/`)
+
+Self-contained folder to benchmark any open-source model on a GPU box. Produces
+`predictions_<model>.jsonl`, graded by the **same** `score_remediations.py` — results are directly
+comparable to the Claude run.
+
+| Path | What it is |
+|---|---|
+| **`qwen/dataset.jsonl`** | The 215 benchmark prompts (same as `benchmark/dataset.jsonl`). |
+| **`qwen/run_inference_qwen.py`** | OpenAI-compatible inference client (works with vLLM, Ollama, TGI). Resumable, 3-retry logic, `--wait-for-server` flag. |
+| **`qwen/serve_qwen.sh`** | Installs vLLM if needed and serves a model on `:8000`. |
+| **`qwen/run_all.sh`** | One-shot: start vLLM → wait → run all 215 prompts. Auto-names output from model ID. |
+| **`qwen/run_models.sh`** | Sequential multi-model runner: serve → infer → kill → next model. |
+| **`qwen/models.txt`** | Default model list (Qwen2.5-Coder-7B, 32B, DeepSeek-Coder-V2-Lite). |
+| **`qwen/predictions_qwen25coder7b.jsonl`** | Qwen2.5-Coder-7B-Instruct predictions (215 rules). |
+| **`qwen/requirements.txt`** | Client dependency (`openai`). |
 
 ---
 
 ## Reproduce it
 
-There are three stages. **Stage 1 (dataset) and Stage 2 (inference) are already done and committed** —
-you only need to redo them to regenerate prompts or benchmark a different model. **Stage 3 (scoring) is
-the one to run** to verify the result yourself.
-
-### Prerequisites
-
-- An **Anthropic API key** — only for Stages 1 & 2. Get one at <https://console.anthropic.com>.
-- A **RHEL-8-family VM** for Stage 3: AlmaLinux 8 / Rocky 8 / RHEL 8, **≥ 2 GB RAM**, root access. A
-  cheap cloud droplet works (this run used DigitalOcean AlmaLinux 8). **Use a throwaway box** — these
-  scripts harden (and sometimes lock down) the machine on purpose.
+### Stage 1 — Build the dataset *(optional; already committed)*
 
 ```bash
 git clone https://github.com/manoharvellala/ClaudeBenchmarkONSTIGRules.git
 cd ClaudeBenchmarkONSTIGRules
-export ANTHROPIC_API_KEY=sk-ant-...        # your own key (Stages 1 & 2 only)
-```
-
-> ⚠️ **Never commit your key.** Pass it via the `ANTHROPIC_API_KEY` environment variable as above; it is
-> already covered by `.gitignore` patterns. If a key is ever pasted into a file or shell history, rotate
-> it in the Anthropic console.
-
-### Stage 1 — Build the dataset *(optional; already committed)*
-
-```bash
 pip install -r requirements.txt
+export ANTHROPIC_API_KEY=sk-ant-...        # your own key
 python3 benchmark/build_dataset.py --results stig-results.xml --generate --out benchmark/dataset.jsonl
 ```
 
-`--extract-only` skips the API and just pulls metadata + reference scripts (no prompts). The full
-`--generate` run authors all 215 leak-free prompts via the Anthropic API.
+> Never commit your API key. Pass it via the environment variable as above.
 
-### Stage 2 — Inference: a model writes the scripts *(needs API key)*
+### Stage 2a — Inference with a Claude model *(needs Anthropic API key)*
 
 ```bash
 python3 benchmark/run_inference.py \
@@ -133,90 +141,98 @@ python3 benchmark/run_inference.py \
   --out benchmark/predictions_opus.jsonl
 ```
 
-Swap `--model` for any Anthropic model (`claude-sonnet-4-6`, `claude-haiku-4-5-…`) to benchmark it — the
-harness is model-agnostic; only the solver call changes. The run is resumable (re-running skips rules
-already in the out file) and flushes after every rule, so a crash or credit-out loses nothing.
+Swap `--model` for any Anthropic model (`claude-sonnet-4-6`, `claude-haiku-4-5-…`).
 
-### Stage 3 — Score: run + verify on the VM *(no API key; this is the real benchmark)*
+### Stage 2b — Inference with an open-source model *(needs a GPU box)*
 
-On the throwaway RHEL-8 host, as root:
+On a box with a 24 GB+ NVIDIA GPU (e.g. RunPod A100):
 
 ```bash
-# 1. install the scanner + the STIG content
+# install vLLM once
+pip install vllm openai
+
+# run inference for a model
+export HF_HOME=/path/to/large/disk   # model weights (~15 GB for 7B)
+cd qwen/
+bash run_all.sh Qwen/Qwen2.5-Coder-7B-Instruct
+# output: predictions_qwen__qwen2.5_coder_7b_instruct.jsonl
+```
+
+See `qwen/README.md` for GPU requirements and multi-model runs.
+
+### Stage 3 — Score on a throwaway RHEL-8 VM *(no API key / GPU needed)*
+
+```bash
+# on AlmaLinux 8 / Rocky 8 / RHEL 8, as root:
 dnf install -y openscap-scanner scap-security-guide python3
-DS=/usr/share/xml/scap/ssg/content/ssg-almalinux8-ds.xml   # or ssg-rhel8-ds.xml on RHEL
+DS=/usr/share/xml/scap/ssg/content/ssg-almalinux8-ds.xml
 
-# 2. copy this repo's benchmark/ dir onto the box, then:
-
-# 2a. score all non-reboot rules, skipping access-breakers (crypto/FIPS/ssh-cipher):
+# copy score_remediations.py, dataset.jsonl, predictions_<model>.jsonl to /root/
 python3 score_remediations.py \
-  --predictions predictions_opus.jsonl \
+  --predictions predictions_<model>.jsonl \
   --dataset dataset.jsonl \
   --datastream "$DS" \
   --phase normal --no-prescan --skip-hazardous \
-  --out results.jsonl
+  --out results_<model>.jsonl
 
-# 2b. OR run the whole thing end-to-end, including the reboot-required rules,
-#     with a single controlled reboot + automatic post-boot rescan:
-bash run_benchmark.sh predictions_opus.jsonl
+python3 compute_scores.py results_<model>.jsonl
 ```
 
-`score_remediations.py` flags:
+`compute_scores.py` prints the same bucket table for any model — drop-in comparable to Claude's numbers.
+
+### `score_remediations.py` flags
 
 | Flag | Effect |
 |---|---|
-| `--phase normal\|apply\|rescan` | `normal` = non-reboot rules; `apply` = run reboot-rule scripts and mark them pending; `rescan` = finalize pending rules after a reboot. |
-| `--no-prescan` | Trust the dataset's recorded `initial_state` instead of re-scanning before each script (halves the oscap calls). |
-| `--skip-hazardous` | Skip crypto/FIPS/ssh-cipher/grub rules that can sever SSH access on a single live host. |
+| `--phase normal\|apply\|rescan` | `normal` = non-reboot rules; `apply` = run reboot-rule scripts; `rescan` = finalize after reboot. |
+| `--no-prescan` | Trust the dataset's recorded `initial_state` (halves oscap calls). |
+| `--skip-hazardous` | Skip crypto/FIPS/ssh-cipher rules that can sever SSH access. |
 | `--limit N` | Score only the first N rules (smoke test). |
-
-Output: `results.jsonl` (one row per rule with `post_scan` and `passed`). Compare against the published
-`benchmark/results_opus_full.jsonl`.
 
 ---
 
 ## How the grading works (the oracle)
 
-For one rule, `score_remediations.py` does:
-
 ```
-oscap xccdf eval --rule <rule_id>   →  expect FAIL   (the box isn't hardened yet)
+oscap xccdf eval --rule <rule_id>   →  expect FAIL   (box not hardened yet)
 bash <model_generated_script>       →  the model's attempt
-oscap xccdf eval --rule <rule_id>   →  PASS = success, FAIL = the script didn't satisfy the check
+oscap xccdf eval --rule <rule_id>   →  PASS = correct, FAIL = didn't satisfy the check
 ```
 
-`oscap` exit codes: **0 = pass, 2 = fail**. A rule is scored `passed` only if the post-scan flips to
-pass. Because the same OVAL definition that DISA ships is the judge, there's no ambiguity and no reward
-for "looks plausible."
+`oscap` exit codes: **0 = pass, 2 = fail**. A rule is scored `passed` only if the post-scan flips
+to pass. Because the same OVAL definition that DISA ships is the judge, there is no ambiguity and no
+reward for "looks plausible."
 
-**Safety:** generated scripts run under a stub `PATH` that turns `reboot`/`shutdown`/`poweroff`/`halt`
-and `systemctl reboot` into no-ops, so a model can't brick the box mid-run. Genuinely reboot-required
-rules are handled explicitly by the `apply`/`rescan` phases.
+**Safety:** generated scripts run under a stub `PATH` that turns `reboot`/`shutdown`/`poweroff` and
+`systemctl reboot` into no-ops, so a model cannot brick the box mid-run. Reboot-required rules are
+handled explicitly by the `apply`/`rescan` phases.
 
 ---
 
-## Caveats (read before quoting a number)
+## Benchmark composition
 
-1. **Crypto/FIPS rules (0/4 verified, +1 unverified) are an infrastructure artifact, not a model failure.** They restrict SSH
-   ciphers/algorithms and lock you out of a single live host mid-run. Scoring them fairly needs a local
-   libvirt/QEMU VM with **per-rule snapshot revert** (future work) — that's also the only rigorous way to
-   eliminate cross-rule contamination.
-2. **sshd (53%) is partly contaminated** — in one run the crypto rules executed before the sshd rules and
-   broke sshd's config. A `--skip-hazardous` run isolates this.
-3. **Single host, no snapshot revert** → some cross-rule interaction is possible. The buckets are scored
-   on separate boxes to limit this.
-4. The result characterizes **`claude-opus-4-8` on the RHEL-8 STIG via the blind/mechanism-hidden prompt
-   set.** A *value-injected* prompt variant (that hands the model the exact `xccdf_value`) would separate
-   "knows the magic number" from "can implement it" — a planned follow-up.
+200 RHEL-8 DISA STIG rules across 14 functional domains. See
+**[benchmark/BENCHMARK_COMPOSITION.md](benchmark/BENCHMARK_COMPOSITION.md)** for the full taxonomy:
+severity distribution (175 medium / 16 low / 9 high), NIST 800-53 mapping, and the shell-scripting
+skill profile required (auditd syntax, sysctl, PAM, sshd_config, GRUB, kernel module blacklisting).
+
+---
+
+## Caveats
+
+1. **Crypto/FIPS rules (0/4 verified) are an infrastructure artifact, not a model failure.** They
+   restrict SSH ciphers and lock you out mid-run. Scoring them fairly needs per-rule snapshot revert.
+2. **sshd (53%) is partly contaminated** — crypto rules can break sshd config when run on the same
+   host. Use `--skip-hazardous` to isolate.
+3. **Single host, no snapshot revert** → some cross-rule interaction is possible.
+4. The result characterizes **the model on the RHEL-8 STIG via blind/mechanism-hidden prompts.** A
+   value-injected variant (handing the model the exact `xccdf_value`) would separately measure
+   "knows the magic number" vs "can implement it."
 
 ---
 
 ## Credits
 
-- STIG content, OVAL checks and reference remediations come from
-  **[ComplianceAsCode/content](https://github.com/ComplianceAsCode/content)** (BSD-3-Clause).
-- Functional scanning by **[OpenSCAP](https://www.open-scap.org/)**.
-- Benchmark harness, prompts, and analysis: this repo (MIT, see `LICENSE`).
-
-Built on the methodology from the author's STIG-remediation LLM fine-tuning work, generalized into a
-reusable, model-agnostic benchmark.
+- STIG content, OVAL checks and reference remediations: **[ComplianceAsCode/content](https://github.com/ComplianceAsCode/content)** (BSD-3-Clause) — 405 contributors, 43,427 commits, maintained since 2011 by Red Hat and SCAP security engineers.
+- Functional scanning: **[OpenSCAP](https://www.open-scap.org/)**.
+- Benchmark harness, prompts, analysis, and open-source inference runner: this repo (MIT, see `LICENSE`).

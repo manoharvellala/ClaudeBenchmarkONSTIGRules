@@ -1,0 +1,10 @@
+# One Hugging Face model id per line. Lines starting with # are skipped.
+# An A100 80GB runs all of these in bf16, one at a time.
+# Gated repos (Llama, Codestral) need: export HF_TOKEN=hf_...
+
+Qwen/Qwen2.5-Coder-7B-Instruct
+Qwen/Qwen2.5-Coder-32B-Instruct
+deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct
+# meta-llama/Llama-3.1-8B-Instruct          # gated: needs HF_TOKEN
+# meta-llama/Llama-3.3-70B-Instruct         # gated; ~40GB at 4-bit, add --quantization awq for the AWQ build
+# mistralai/Codestral-22B-v0.1              # gated: needs HF_TOKEN

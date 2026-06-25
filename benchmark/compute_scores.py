@@ -13,12 +13,29 @@ from collections import defaultdict
 
 PATH = sys.argv[1] if len(sys.argv) > 1 else "benchmark/results_opus_full.jsonl"
 
+# Optional dataset path to look up bucket when results file lacks the field
+import os
+_DATASET_CANDIDATES = [
+    os.path.join(os.path.dirname(PATH), "dataset.jsonl"),
+    "benchmark/dataset.jsonl",
+    "dataset.jsonl",
+]
+
+
+def _load_bucket_map():
+    for p in _DATASET_CANDIDATES:
+        if os.path.exists(p):
+            return {json.loads(l)["rule_id"]: json.loads(l).get("bucket")
+                    for l in open(p) if json.loads(l).get("bucket")}
+    return {}
+
 
 def main():
     rows = [json.loads(l) for l in open(PATH)]
+    bucket_map = _load_bucket_map()
     agg = defaultdict(lambda: {"pass": 0, "fail": 0, "unverified": 0})
     for r in rows:
-        b = r["bucket"]
+        b = r.get("bucket") or bucket_map.get(r.get("rule_id"), "unknown")
         if r["passed"] is True:
             agg[b]["pass"] += 1
         elif r["passed"] is False:

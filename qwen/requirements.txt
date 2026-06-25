@@ -1,0 +1,6 @@
+# Inference client (runs run_inference_qwen.py)
+openai>=1.0.0
+
+# Model server (installed by serve_qwen.sh; listed here for reference).
+# vllm pulls in a matching torch + CUDA build, so install it on the GPU box.
+# vllm>=0.6.0
