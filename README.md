@@ -15,7 +15,7 @@ reference-script diffing — a compliance scanner is the oracle.
 > |---|---|---|
 > | **Claude Opus 4.8** | **88.8%** (143/161) | **83.9%** (151/180) |
 > | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
-> | Qwen2.5-Coder-14B-Instruct | *(scoring in progress)* | *(scoring in progress)* |
+> | Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | 35.1% (53/151) |
 > | Qwen2.5-Coder-7B-Instruct | 16.3% (20/123) | 17.5% (24/137) |
 >
 > Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
@@ -49,19 +49,20 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 | Bucket | Claude Opus 4.8 | GPT-4o | Qwen2.5-Coder-14B | Qwen2.5-Coder-7B |
 |---|---|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | *(pending)* | 19/79 = **24.1%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | *(pending)* | 1/44 = **2.3%** |
-| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | *(pending)* | **20/123 = 16.3%** |
-| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | *(pending)* | 4/14 = 28.6% |
+| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 32/79 = **40.5%** | 19/79 = **24.1%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 14/58 = **24.1%** | 1/44 = **2.3%** |
+| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **46/137 = 33.6%** | **20/123 = 16.3%** |
+| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 7/14 = 50.0% | 4/14 = 28.6% |
 | Crypto / FIPS | 0/4 = 0% | — | — | — |
 | Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | *(pending)* | **24/137 = 17.5%** |
+| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **53/151 = 35.1%** | **24/137 = 17.5%** |
 
 **Key findings:**
 - Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
 - GPT-4o scores **65.7%** — solid mid-tier; notably best on sshd (71.4%) but weaker on audit rules (62.1%).
+- Qwen2.5-Coder-14B scores **33.6%** — 2× the 7B but still well below GPT-4o; audit rules remain a clear weakness (24.1%).
 - Qwen2.5-Coder-7B scores **16.3%** — nearly unable to write correct `auditd` rules (2.3%).
-- Claude scores **1.35× higher** than GPT-4o and **5.4× higher** than Qwen 7B on combined server-safe.
+- Claude scores **1.35× higher** than GPT-4o, **2.6× higher** than Qwen 14B, and **5.4× higher** than Qwen 7B.
 
 Scanner: OpenSCAP 1.3.14 · SSG 0.1.81 `stig` profile · Host: AlmaLinux 8 (RHEL-8
 binary-compatible, headless server).
