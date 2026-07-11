@@ -147,6 +147,12 @@ def main():
     ap.add_argument("--skip-hazardous", action="store_true",
                     help="exclude rules that can sever SSH/console access or need reboot "
                          "(crypto policy, FIPS, SSH ciphers/MACs, GRUB) — keeps the host reachable")
+    ap.add_argument("--reverse", action="store_true",
+                    help="process the remaining (not-yet-done) rules from the end of the list "
+                         "backward — pairs with a forward run on another host so a landmine rule "
+                         "that kills one box doesn't block the other from covering its half. "
+                         "Printed row numbers are absolute positions (e.g. [168] first), not a "
+                         "restarted counter.")
     args = ap.parse_args()
 
     if os.geteuid() != 0:
@@ -173,25 +179,33 @@ def main():
                 pass
 
     want_reboot = (args.phase == "apply")     # apply phase = reboot rules; normal = the rest
-    todo = []
+    candidates = []
     for p in preds:
         rid = p["rule_id"]
-        if rid in done or not p.get("generated_script"):
+        if not p.get("generated_script"):
             continue
         if bool(meta.get(rid, {}).get("reboot_required")) != want_reboot:
             continue
         if args.skip_hazardous and is_hazardous(rid):
             continue
-        todo.append(p)
+        candidates.append(p)
+    position = {p["rule_id"]: i for i, p in enumerate(candidates, 1)}   # absolute 1-indexed slot
+    total = len(candidates)
+
+    todo = [p for p in candidates if p["rule_id"] not in done]
+    if args.reverse:
+        todo = list(reversed(todo))
     if args.limit:
         todo = todo[:args.limit]
 
-    print(f"phase={args.phase}: {len(done)} already recorded; processing {len(todo)} rules.",
-          flush=True)
+    direction = "reverse" if args.reverse else "forward"
+    print(f"phase={args.phase} ({direction}): {len(done)} already recorded; "
+          f"processing {len(todo)} of {total} rules.", flush=True)
     out_f = open(args.out, "a")
     try:
-        for i, p in enumerate(todo, 1):
+        for p in todo:
             rid = p["rule_id"]
+            i = position[rid]
             if args.no_prescan:
                 pre = meta.get(rid, {}).get("initial_state", "unknown")   # from dataset, no scan
             else:
@@ -211,7 +225,7 @@ def main():
             out_f.write(json.dumps(rec) + "\n")
             out_f.flush()
             tag = "applied (pending reboot)" if args.phase == "apply" else ("PASS" if passed else "fail")
-            print(f"[{len(done)+i}] {p.get('stig_id')} {rid}: {pre} -> {post}  {tag} (exit {rc})",
+            print(f"[{i}/{total}] {p.get('stig_id')} {rid}: {pre} -> {post}  {tag} (exit {rc})",
                   flush=True)
     finally:
         out_f.close()
