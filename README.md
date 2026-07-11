@@ -17,6 +17,7 @@ reference-script diffing — a compliance scanner is the oracle.
 > | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
 > | Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | 35.1% (53/151) |
 > | Qwen2.5-Coder-7B-Instruct | 16.3% (20/123) | 17.5% (24/137) |
+> | GLM4-9B FP16 (Ollama) | 13.0% (18/138) | 13.8% (21/152) |
 > | GLM4-9B (4-bit, Ollama) | 12.4% (17/137) | 12.6% (19/151) |
 >
 > Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
