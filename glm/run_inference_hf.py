@@ -37,7 +37,7 @@ def extract_bash(response_text):
 def load_model(model_id, hf_token):
     try:
         import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
     except ImportError:
         sys.exit("pip install transformers torch accelerate")
 
@@ -46,9 +46,15 @@ def load_model(model_id, hf_token):
         model_id, trust_remote_code=True, token=hf_token
     )
 
+    # CodeGeeX4/ChatGLM custom code uses config.max_length; patch if missing
+    config = AutoConfig.from_pretrained(model_id, trust_remote_code=True, token=hf_token)
+    if not hasattr(config, "max_length"):
+        config.max_length = getattr(config, "seq_length", 8192)
+
     print(f"Loading model: {model_id} (BF16, auto device map)...", flush=True)
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
+        config=config,
         trust_remote_code=True,
         torch_dtype=torch.bfloat16,
         device_map="auto",
