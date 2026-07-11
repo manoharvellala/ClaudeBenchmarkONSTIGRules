@@ -17,9 +17,9 @@ reference-script diffing — a compliance scanner is the oracle.
 > | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
 > | DeepSeek-Coder-33B-Instruct FP16 (Ollama) | 35.8% (49/137) | 36.4% (55/151) |
 > | Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | 35.1% (53/151) |
-> | CodeLlama-34B-Instruct FP16 (Ollama) | 21.5% (29/135) | 21.5% (32/149) |
-> | Qwen2.5-Coder-7B-Instruct | 16.3% (20/123) | 17.5% (24/137) |
-> | GLM4-9B FP16 (Ollama) | 13.0% (18/138) | 13.8% (21/152) |
+> | CodeLlama-34B-Instruct FP16 (Ollama) | 21.2% (29/137) | 21.2% (32/151) |
+> | Qwen2.5-Coder-7B-Instruct | 14.6% (20/137) | 15.9% (24/151) |
+> | GLM4-9B FP16 (Ollama) | 13.1% (18/137) | 13.9% (21/151) |
 > | GLM4-9B (4-bit, Ollama) | 12.4% (17/137) | 12.6% (19/151) |
 >
 > Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
@@ -53,23 +53,24 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 | Bucket | Claude Opus 4.8 | GPT-4o | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16 | Qwen2.5-Coder-7B | GLM4-9B FP16 | GLM4-9B (4-bit) |
 |---|---|---|---|---|---|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 36/80 = **45.0%** | 32/79 = **40.5%** | 21/78 = **26.9%** | 19/79 = **24.1%** | 18/81 = **21.0%** | 17/80 = **21.2%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 13/57 = **22.8%** | 14/58 = **24.1%** | 8/57 = **14.0%** | 1/44 = **2.3%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
-| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/135 = 21.5%** | **20/123 = 16.3%** | **18/138 = 13.0%** | **17/137 = 12.4%** |
+| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 36/80 = **45.0%** | 32/79 = **40.5%** | 21/80 = **26.2%** | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 13/57 = **22.8%** | 14/58 = **24.1%** | 8/57 = **14.0%** | 1/58 = **1.7%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
+| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
 | sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 3/14 = **21.4%** | 2/14 = **14.3%** |
 | Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — |
-| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 15 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/149 = 21.5%** | **24/137 = 17.5%** | **21/152 = 13.8%** | **19/151 = 12.6%** |
+| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
+| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
 
 **Key findings:**
 - Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
 - GPT-4o scores **65.7%** — solid mid-tier; notably best on sshd (71.4%) but weaker on audit rules (62.1%).
 - DeepSeek-Coder-33B (FP16) scores **35.8%** — narrowly ahead of Qwen2.5-Coder-14B, with the strongest sshd score (42.9%) among open-source models.
 - Qwen2.5-Coder-14B scores **33.6%** — 2× the 7B but still well below GPT-4o; audit rules remain a clear weakness (24.1%).
-- CodeLlama-34B (FP16) scores **21.5%** — larger than Qwen-14B but noticeably weaker, underperforming even DeepSeek-Coder-33B by a wide margin despite comparable parameter count.
-- Qwen2.5-Coder-7B scores **16.3%** — nearly unable to write correct `auditd` rules (2.3%).
-- GLM4-9B scores **12-13%** regardless of precision (FP16 vs 4-bit) — weakest model tested, essentially unable to write correct `auditd` rules (0-2%).
-- Claude scores **1.35× higher** than GPT-4o, **2.3× higher** than DeepSeek-Coder-33B, **2.6× higher** than Qwen 14B, **3.9× higher** than CodeLlama-34B, **5.4× higher** than Qwen 7B, and **~6.5× higher** than GLM4-9B.
+- CodeLlama-34B (FP16) scores **21.2%** — larger than Qwen-14B but noticeably weaker, underperforming even DeepSeek-Coder-33B by a wide margin despite comparable parameter count.
+- Qwen2.5-Coder-7B scores **14.6%** — nearly unable to write correct `auditd` rules (1.7%).
+- GLM4-9B scores **~13%** regardless of precision (FP16 vs 4-bit) — weakest model tested, essentially unable to write correct `auditd` rules (0-2%).
+- Claude scores **1.35× higher** than GPT-4o, **2.5× higher** than DeepSeek-Coder-33B, **2.6× higher** than Qwen 14B, **4.2× higher** than CodeLlama-34B, **6.1× higher** than Qwen 7B, and **~6.8× higher** than GLM4-9B.
+- Denominators are normalized to the standard **137 / 151** split (matching Claude/GPT-4o methodology) across every model. Where a run did not score every rule — either because a scoring host crashed mid-run (CodeLlama-34B, GLM4-9B FP16) or because the original published numbers used a smaller denominator (Qwen2.5-Coder-7B) — the unscored/missing rules are counted as failures rather than excluded, so percentages are directly comparable but may understate a model's true rate slightly.
 
 Scanner: OpenSCAP 1.3.14 · SSG 0.1.81 `stig` profile · Host: AlmaLinux 8 (RHEL-8
 binary-compatible, headless server).
