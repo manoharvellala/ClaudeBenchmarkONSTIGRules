@@ -17,6 +17,7 @@ reference-script diffing — a compliance scanner is the oracle.
 > | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
 > | Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | 35.1% (53/151) |
 > | Qwen2.5-Coder-7B-Instruct | 16.3% (20/123) | 17.5% (24/137) |
+> | GLM4-9B (4-bit, Ollama) | 12.4% (17/137) | 12.6% (19/151) |
 >
 > Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
 
@@ -47,22 +48,23 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 ### Model Comparison
 
-| Bucket | Claude Opus 4.8 | GPT-4o | Qwen2.5-Coder-14B | Qwen2.5-Coder-7B |
-|---|---|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 32/79 = **40.5%** | 19/79 = **24.1%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 14/58 = **24.1%** | 1/44 = **2.3%** |
-| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **46/137 = 33.6%** | **20/123 = 16.3%** |
-| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 7/14 = 50.0% | 4/14 = 28.6% |
-| Crypto / FIPS | 0/4 = 0% | — | — | — |
-| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **53/151 = 35.1%** | **24/137 = 17.5%** |
+| Bucket | Claude Opus 4.8 | GPT-4o | Qwen2.5-Coder-14B | Qwen2.5-Coder-7B | GLM4-9B (4-bit) |
+|---|---|---|---|---|---|
+| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 32/79 = **40.5%** | 19/79 = **24.1%** | 17/80 = **21.2%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 14/58 = **24.1%** | 1/44 = **2.3%** | 0/57 = **0.0%** |
+| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **46/137 = 33.6%** | **20/123 = 16.3%** | **17/137 = 12.4%** |
+| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 7/14 = 50.0% | 4/14 = 28.6% | 2/14 = **14.3%** |
+| Crypto / FIPS | 0/4 = 0% | — | — | — | — |
+| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
+| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **53/151 = 35.1%** | **24/137 = 17.5%** | **19/151 = 12.6%** |
 
 **Key findings:**
 - Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
 - GPT-4o scores **65.7%** — solid mid-tier; notably best on sshd (71.4%) but weaker on audit rules (62.1%).
 - Qwen2.5-Coder-14B scores **33.6%** — 2× the 7B but still well below GPT-4o; audit rules remain a clear weakness (24.1%).
 - Qwen2.5-Coder-7B scores **16.3%** — nearly unable to write correct `auditd` rules (2.3%).
-- Claude scores **1.35× higher** than GPT-4o, **2.6× higher** than Qwen 14B, and **5.4× higher** than Qwen 7B.
+- GLM4-9B (4-bit) scores **12.4%** — weakest model tested; like Qwen-7B it cannot write correct `auditd` rules (0/57).
+- Claude scores **1.35× higher** than GPT-4o, **2.6× higher** than Qwen 14B, **5.4× higher** than Qwen 7B, and **7.2× higher** than GLM4-9B.
 
 Scanner: OpenSCAP 1.3.14 · SSG 0.1.81 `stig` profile · Host: AlmaLinux 8 (RHEL-8
 binary-compatible, headless server).
@@ -131,6 +133,19 @@ comparable to the Claude run.
 | **`qwen/models.txt`** | Default model list (Qwen2.5-Coder-7B, 32B, DeepSeek-Coder-V2-Lite). |
 | **`qwen/predictions_qwen25coder7b.jsonl`** | Qwen2.5-Coder-7B-Instruct predictions (215 rules). |
 | **`qwen/requirements.txt`** | Client dependency (`openai`). |
+
+### GLM / CodeLlama / DeepSeek Coder inference (`glm4/`, `llama/`, `deepseek/`)
+
+Same pattern as `qwen/` — served via [Ollama](https://ollama.com) instead of vLLM, one folder per
+model family. `glm/` also has a vLLM-based runner for models too large/unsupported for Ollama.
+
+| Path | What it is |
+|---|---|
+| **`glm4/predictions_glm4_9b_q4.jsonl`** | GLM4-9B, 4-bit (Ollama default `Q4_K_M`), 215 rows. |
+| **`glm4/results_glm4_9b_q4.jsonl`** | Scored results (168 rows scored, `--skip-hazardous`). |
+| **`glm4/predictions_glm4_9b_fp16.jsonl`** | GLM4-9B, full FP16 precision, 215 rows. |
+| **`llama/predictions_codellama_{7b,13b,34b}-instruct-fp16.jsonl`** | CodeLlama family, full FP16, 215 rows each. |
+| **`deepseek/predictions_deepseek-coder_33b-instruct-fp16.jsonl`** | DeepSeek Coder 33B, full FP16, 215 rows. |
 
 ---
 
