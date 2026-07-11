@@ -51,15 +51,14 @@ def load_model(model_id, hf_token):
     if not hasattr(config, "max_length"):
         config.max_length = getattr(config, "seq_length", 8192)
 
-    print(f"Loading model: {model_id} (BF16, auto device map)...", flush=True)
+    print(f"Loading model: {model_id} (BF16, cuda:0)...", flush=True)
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         config=config,
         trust_remote_code=True,
         torch_dtype=torch.bfloat16,
-        device_map="auto",
         token=hf_token,
-    )
+    ).to("cuda")
     model.eval()
     print("Model loaded.", flush=True)
     return model, tokenizer
