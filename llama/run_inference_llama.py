@@ -26,25 +26,34 @@ import time
 DATASET_DEFAULT = os.path.join(os.path.dirname(__file__), "..", "benchmark", "dataset.jsonl")
 
 
+def strip_think_blocks(text):
+    """Remove <think>...</think> reasoning traces some models (GLM, DeepSeek-R1-style) emit."""
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
+
 def extract_bash(response_text):
     if not response_text:
         return ""
-    m = re.findall(r"```(?:bash|sh)\s*\n(.*?)```", response_text, re.DOTALL)
+    text = strip_think_blocks(response_text)
+    m = re.findall(r"```(?:bash|sh)\s*\n(.*?)```", text, re.DOTALL)
     if m:
         return max(m, key=len).strip()
-    m = re.findall(r"```\s*\n?(.*?)```", response_text, re.DOTALL)
+    m = re.findall(r"```\s*\n?(.*?)```", text, re.DOTALL)
     if m:
         return max(m, key=len).strip()
-    return response_text.strip()
+    return text.strip()
 
 
-def solve(client, model, prompt, max_tokens, temperature):
-    resp = client.chat.completions.create(
+def solve(client, model, prompt, max_tokens, temperature, seed=None):
+    kwargs = dict(
         model=model,
         max_tokens=max_tokens,
         temperature=temperature,
         messages=[{"role": "user", "content": prompt}],
     )
+    if seed is not None:
+        kwargs["seed"] = seed
+    resp = client.chat.completions.create(**kwargs)
     return resp.choices[0].message.content or ""
 
 
@@ -55,6 +64,8 @@ def main():
     ap.add_argument("--base-url", default="http://localhost:11434/v1")
     ap.add_argument("--api-key", default="ollama")
     ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--seed", type=int, default=None,
+                    help="per-run sampling seed; omit for deterministic temp=0 runs")
     ap.add_argument("--max-tokens", type=int, default=2048)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--out", default=None)
@@ -107,7 +118,7 @@ def main():
             for attempt in range(3):
                 try:
                     raw = solve(client, args.model, r["prompt"],
-                                args.max_tokens, args.temperature)
+                                args.max_tokens, args.temperature, args.seed)
                     break
                 except Exception as e:
                     if attempt == 2:
@@ -116,13 +127,14 @@ def main():
                         time.sleep(3)
 
             script = extract_bash(raw)
-            fenced = "```" in raw
+            fenced = "```" in strip_think_blocks(raw)
             pred = {
                 "rule_id": r["rule_id"],
                 "stig_id": r.get("stig_id", ""),
                 "model": args.model,
                 "generated_script": script,
                 "extracted_ok": bool(script) and fenced,
+                "has_think_block": bool(re.search(r"<think>", raw)),
                 "raw_response": raw,
             }
             out_f.write(json.dumps(pred) + "\n")
