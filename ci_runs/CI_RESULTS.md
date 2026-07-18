@@ -45,8 +45,42 @@ of plausible outcomes rather than the middle.
 
 ## GLM4-9B FP16 (Ollama)
 
-Scoring in progress: run1 on 104.248.226.231 (started), run2/run3 not yet started. Table to be
-added once all 3 finish.
+**4 runs**: the original greedy run (temp=0, `glm4/results_glm4_9b_fp16.jsonl`) plus 3 seeded runs
+(temp=0.2, seeds 101/102/103). run1/run2 scored on dedicated droplets without incident; run3 was
+the most operationally troublesome scoring run of this study — its first droplet
+(159.223.110.12) lost SSH mid-run (the same sshd-corruption failure mode seen elsewhere in this
+project, caused by one of GLM4-9B's own generated remediation scripts), so scoring resumed on a
+second droplet (142.93.73.75) with the 73 already-completed rows pre-seeded. That second droplet
+also lost SSH before finishing, requiring a console-captured, reverse-then-forward continuation
+across two more sessions on the same box. One rule
+(`accounts_users_home_files_groupownership`) hung and never completed after the final relaunch and
+was recorded as a synthetic failure rather than left unscored. All 168 rows are accounted for.
+
+### Per-run (combined server-safe)
+
+| Run | Sampling | Source | Passed/Total | Rate |
+|---|---|---|---|---|
+| original | temp=0 (greedy) | `glm4/results_glm4_9b_fp16.jsonl` | 18/137 | 13.1% |
+| run1 | temp=0.2, seed=101 | `ci_runs/run1/logs/run1_score_glm4_9b_fp16.log` | 24/137 | 17.5% |
+| run2 | temp=0.2, seed=102 | `ci_runs/run2/logs/run2_score_glm4_9b_fp16.log` | 17/137 | 12.4% |
+| run3 | temp=0.2, seed=103 | `ci_runs/run3/logs/run3_score_glm4_9b_fp16.log` (composite, 3 droplets) | 18/137 | 13.1% |
+
+### Per-category, pooled across all 4 runs
+
+| Category | Passed/Total | Rate | 95% Wilson CI |
+|---|---|---|---|
+| Server config + kernel | 74/320 | 23.1% | 18.8% – 28.0% |
+| Audit rules (`audit_rules_*`) | 3/228 | 1.3% | 0.4% – 3.8% |
+| sshd config | 7/56 | 12.5% | 6.2% – 23.6% |
+| **→ Combined server-safe** (server config+kernel + audit) | **77/548** | **14.1%** | **11.4% – 17.2%** |
+| **All verified applicable** (+ sshd + access_breaker) | **84/604** | **13.9%** | **11.4% – 16.9%** |
+
+Crypto/FIPS (`access_breaker`) and not-applicable rules contributed 0 rows — excluded from
+scoring by `--skip-hazardous`.
+
+Note: the original single-run estimate (13.1%, 18/137) sits comfortably inside the pooled CI.
+Like the 4-bit variant, GLM4-9B FP16 is nearly incapable of writing correct `auditd` rules (1.3%
+pooled pass rate vs 0.4% for 4-bit) — precision doesn't change this model family's core weakness.
 
 ## GLM4-9B 4-bit (Ollama)
 
