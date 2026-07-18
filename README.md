@@ -16,17 +16,21 @@ reference-script diffing — a compliance scanner is the oracle.
 > | **Claude Opus 4.8** | **88.8%** (143/161) | **83.9%** (151/180) |
 > | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
 > | DeepSeek-Coder-33B-Instruct FP16 (Ollama) | 35.8% (49/137) | 36.4% (55/151) |
-> | Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | 35.1% (53/151) |
+> | Qwen2.5-Coder-14B-Instruct² | 28.9% (116/401, 95% CI 24.7–33.5%) | 30.7% (136/443, 95% CI 26.6–35.1%) |
 > | CodeLlama-34B-Instruct FP16 (Ollama)¹ | 19.9% (109/548, 95% CI 16.8–23.4%) | 20.4% (123/604, 95% CI 17.3–23.8%) |
 > | Qwen2.5-Coder-7B-Instruct | 14.6% (20/137) | 15.9% (24/151) |
 > | GLM4-9B FP16 (Ollama) | 13.1% (18/137) | 13.9% (21/151) |
 > | GLM4-9B (4-bit, Ollama) | 12.4% (17/137) | 12.6% (19/151) |
 >
-> ¹ Only model re-run with a confidence interval so far: **4 total runs** — the original greedy
-> (temp=0) run plus **3 independent seeded runs** (temp=0.2, seeds 101/102/103) — see
-> [Confidence intervals](#confidence-intervals) below. The single-run point estimate (21.2%,
-> 29/137) sits inside this CI, near its upper edge. Every other row above is still a single
-> temp=0 run.
+> ¹ **4 total runs** — the original greedy (temp=0) run plus **3 independent seeded runs**
+> (temp=0.2, seeds 101/102/103) — see [Confidence intervals](#confidence-intervals) below. The
+> single-run point estimate (21.2%, 29/137) sits inside this CI, near its upper edge.
+>
+> ² **3 independent seeded runs** (temp=0.2, seeds 101/102/103; no original-run baseline scored
+> in this repo to add as a 4th). The originally published single-run estimate (33.6%, 46/137)
+> sits right at this CI's upper edge, just outside the combined server-safe interval — unlike
+> CodeLlama-34B, here the single run reads as somewhat optimistic relative to the pooled result.
+> Every other row above is still a single temp=0 run.
 >
 > Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
 
@@ -57,29 +61,31 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 ### Model Comparison
 
-| Bucket | Claude Opus 4.8 | GPT-4o | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16¹ | Qwen2.5-Coder-7B | GLM4-9B FP16 | GLM4-9B (4-bit) |
+| Bucket | Claude Opus 4.8 | GPT-4o | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B² | CodeLlama-34B FP16¹ | Qwen2.5-Coder-7B | GLM4-9B FP16 | GLM4-9B (4-bit) |
 |---|---|---|---|---|---|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 36/80 = **45.0%** | 32/79 = **40.5%** | 78/320 = **24.4%** (CI 20.0–29.4%) | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 13/57 = **22.8%** | 14/58 = **24.1%** | 31/228 = **13.6%** (CI 9.7–18.7%) | 1/58 = **1.7%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
-| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **49/137 = 35.8%** | **46/137 = 33.6%** | **109/548 = 19.9%** (CI 16.8–23.4%) | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
-| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 6/14 = **42.9%** | 7/14 = 50.0% | 14/56 = **25.0%** (CI 15.5–37.7%) | 4/14 = 28.6% | 3/14 = **21.4%** | 2/14 = **14.3%** |
+| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 36/80 = **45.0%** | 85/239 = **35.6%** (CI 29.8–41.8%) | 78/320 = **24.4%** (CI 20.0–29.4%) | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 13/57 = **22.8%** | 31/162 = **19.1%** (CI 13.8–25.9%) | 31/228 = **13.6%** (CI 9.7–18.7%) | 1/58 = **1.7%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
+| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **49/137 = 35.8%** | **116/401 = 28.9%** (CI 24.7–33.5%) | **109/548 = 19.9%** (CI 16.8–23.4%) | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
+| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 6/14 = **42.9%** | 20/42 = **47.6%** (CI 33.4–62.3%) | 14/56 = **25.0%** (CI 15.5–37.7%) | 4/14 = 28.6% | 3/14 = **21.4%** | 2/14 = **14.3%** |
 | Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — |
 | Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **55/151 = 36.4%** | **53/151 = 35.1%** | **123/604 = 20.4%** (CI 17.3–23.8%) | **24/151 = 15.9%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
+| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **55/151 = 36.4%** | **136/443 = 30.7%** (CI 26.6–35.1%) | **123/604 = 20.4%** (CI 17.3–23.8%) | **24/151 = 15.9%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
 
-¹ CodeLlama-34B numbers are pooled across **4 runs** (1 original greedy + 3 seeded temp=0.2)
-with a 95% Wilson confidence interval — see [Confidence intervals](#confidence-intervals). Every
-other column is a single temp=0 run.
+¹ CodeLlama-34B numbers are pooled across **4 runs** (1 original greedy + 3 seeded temp=0.2).
+² Qwen2.5-Coder-14B numbers are pooled across **3 seeded runs** (temp=0.2; no original-run
+results file was available in this repo to add as a 4th). Both use a 95% Wilson confidence
+interval — see [Confidence intervals](#confidence-intervals). Every other column is a single
+temp=0 run.
 
 **Key findings:**
 - Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
 - GPT-4o scores **65.7%** — solid mid-tier; notably best on sshd (71.4%) but weaker on audit rules (62.1%).
-- DeepSeek-Coder-33B (FP16) scores **35.8%** — narrowly ahead of Qwen2.5-Coder-14B, with the strongest sshd score (42.9%) among open-source models.
-- Qwen2.5-Coder-14B scores **33.6%** — 2× the 7B but still well below GPT-4o; audit rules remain a clear weakness (24.1%).
+- DeepSeek-Coder-33B (FP16) scores **35.8%** — ahead of Qwen2.5-Coder-14B, with the strongest sshd score (42.9%) among open-source models.
+- Qwen2.5-Coder-14B scores **28.9%** (95% CI 24.7–33.5%, pooled over 3 runs) — still well below GPT-4o and DeepSeek-Coder-33B; audit rules remain a clear weakness (19.1%). The originally published single-run estimate (33.6%) sits right at this CI's upper edge.
 - CodeLlama-34B (FP16) scores **19.9%** (95% CI 16.8–23.4%, pooled over 4 runs) — larger than Qwen-14B but noticeably weaker, underperforming even DeepSeek-Coder-33B by a wide margin despite comparable parameter count.
 - Qwen2.5-Coder-7B scores **14.6%** — nearly unable to write correct `auditd` rules (1.7%).
 - GLM4-9B scores **~13%** regardless of precision (FP16 vs 4-bit) — weakest model tested, essentially unable to write correct `auditd` rules (0-2%).
-- Claude scores **1.35× higher** than GPT-4o, **2.5× higher** than DeepSeek-Coder-33B, **2.6× higher** than Qwen 14B, **4.5× higher** than CodeLlama-34B, **6.1× higher** than Qwen 7B, and **~6.8× higher** than GLM4-9B.
+- Claude scores **1.35× higher** than GPT-4o, **2.5× higher** than DeepSeek-Coder-33B, **3.1× higher** than Qwen 14B, **4.5× higher** than CodeLlama-34B, **6.1× higher** than Qwen 7B, and **~6.8× higher** than GLM4-9B.
 - Denominators are normalized to the standard **137 / 151** split (matching Claude/GPT-4o methodology) across every model. Where a run did not score every rule — either because a scoring host crashed mid-run (CodeLlama-34B, GLM4-9B FP16) or because the original published numbers used a smaller denominator (Qwen2.5-Coder-7B) — the unscored/missing rules are counted as failures rather than excluded, so percentages are directly comparable but may understate a model's true rate slightly.
 
 Scanner: OpenSCAP 1.3.14 · SSG 0.1.81 `stig` profile · Host: AlmaLinux 8 (RHEL-8
@@ -93,8 +99,8 @@ move if you asked the model again. We're re-running open-source models multiple 
 the same greedy output) and pooling the results into a 95% Wilson score interval, treating every
 `(rule, run)` pair as one Bernoulli trial.
 
-**CodeLlama-34B-Instruct FP16 is the first model done** — 4 runs total (the original greedy temp=0
-run + 3 seeded temp=0.2 runs):
+**CodeLlama-34B-Instruct FP16** — 4 runs total (the original greedy temp=0 run + 3 seeded
+temp=0.2 runs):
 
 | Run | Sampling | Combined server-safe |
 |---|---|---|
@@ -108,11 +114,30 @@ The original single-run point estimate sits inside the interval, near its upper 
 (the first run wasn't a fluke) but also the point: a single run alone couldn't tell you it was near
 the high end of plausible values rather than the middle.
 
+**Qwen2.5-Coder-14B-Instruct** — 3 seeded temp=0.2 runs (no scored original-run results file was
+available in this repo to add as a 4th):
+
+| Run | Sampling | Combined server-safe |
+|---|---|---|
+| run1 | temp=0.2, seed=101 | 42/137 = 30.7% |
+| run2 | temp=0.2, seed=102 | 32/137 = 23.4% |
+| run3 | temp=0.2, seed=103 | 42/127 = 33.1% (204/215 predictions synced for this run — 11 rows short; see below) |
+| **pooled** | | **116/401 = 28.9%, 95% CI 24.7–33.5%** |
+
+Here the originally published single-run estimate (33.6%, 46/137) sits right at the CI's upper
+edge, effectively just outside it — the opposite lean from CodeLlama-34B, and a good illustration
+of why a single run shouldn't be read as "the" number for a model. Note run3's predictions file
+was short 11 rows (a GPU pod outage interrupted generation before the final sync) — those rows are
+simply absent from run3's totals rather than counted as failures, since they were never candidates
+for scoring in the first place (unlike within-run scoring gaps, which are counted as failures per
+the denominator-normalization note above).
+
 Reproduce it: `python3 benchmark/compute_ci.py --model <name> <results_or_log_file> [...]`. It
 accepts either standard `results_<model>.jsonl` grader output or a captured
-`score_remediations.py` text log (used here for 3 of the 4 runs, where scoring-host SSH access was
-lost mid-run and results were retrieved via console instead — see `ci_runs/` for the raw per-run
-predictions and logs). GLM4-9B (FP16 + 4-bit) and Qwen2.5-Coder-14B/7B are queued for the same
+`score_remediations.py` text log (used for most runs above, since scoring-host SSH access was
+repeatedly lost mid-run across both batches of droplets and results were retrieved via console
+instead — see `ci_runs/` for the raw per-run predictions, logs, and `CI_RESULTS.md` for the full
+per-category breakdown). GLM4-9B (FP16 + 4-bit) and Qwen2.5-Coder-7B are queued for the same
 treatment; this section will be updated as those finish.
 
 ### Claude Opus 4.8 — Full Breakdown

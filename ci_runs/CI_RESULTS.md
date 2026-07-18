@@ -54,8 +54,42 @@ Not yet started (queued after GLM4-9B FP16 on each droplet).
 
 ## Qwen2.5-Coder-14B-Instruct
 
-Predictions complete for all 3 runs (generated on the GPU pod); scoring not yet started on the
-droplets (queued after both GLM4-9B variants).
+**3 runs**, all seeded (temp=0.2, seeds 101/102/103) — no scored original-run results file was
+available in this repo to add as a 4th baseline. Scored on 3 dedicated droplets
+(64.227.31.210/67.205.142.115/67.205.134.254), one run each — same run{N}<->droplet mapping
+convention as CodeLlama, just a separate set of droplets.
+
+### Per-run (combined server-safe)
+
+| Run | Sampling | Source | Passed/Total | Rate |
+|---|---|---|---|---|
+| run1 | temp=0.2, seed=101 | `ci_runs/run1/logs/run1_score_qwen25coder14b_fp16.log` | 42/137 | 30.7% |
+| run2 | temp=0.2, seed=102 | `ci_runs/run2/logs/run2_score_qwen25coder14b_fp16.log` | 32/137 | 23.4% |
+| run3 | temp=0.2, seed=103 | `ci_runs/run3/logs/run3_score_qwen25coder14b_fp16.log` | 42/127 | 33.1% |
+
+Note: run3's predictions file only had 204/215 rows (a GPU pod outage interrupted generation
+before the final sync completed) — 11 rows were never candidates for scoring and are absent from
+run3's totals, not counted as failures. This differs from within-run scoring gaps (e.g. a scoring
+host crash mid-run), which per this repo's normalization convention *are* counted as failures —
+see the denominator note in the main README.
+
+### Per-category, pooled across all 3 runs
+
+| Category | Passed/Total | Rate | 95% Wilson CI |
+|---|---|---|---|
+| Server config + kernel | 85/239 | 35.6% | 29.8% – 41.8% |
+| Audit rules (`audit_rules_*`) | 31/162 | 19.1% | 13.8% – 25.9% |
+| sshd config | 20/42 | 47.6% | 33.4% – 62.3% |
+| **→ Combined server-safe** (server config+kernel + audit) | **116/401** | **28.9%** | **24.7% – 33.5%** |
+| **All verified applicable** (+ sshd + access_breaker) | **136/443** | **30.7%** | **26.6% – 35.1%** |
+
+Crypto/FIPS (`access_breaker`) and not-applicable rules contributed 0 rows — excluded from
+scoring by `--skip-hazardous`.
+
+Note: the originally published single-run estimate (33.6%, 46/137) sits right at this CI's upper
+edge, effectively just outside it — the opposite lean from CodeLlama-34B (whose single run sat
+comfortably inside, near the upper edge). Illustrates the point of this whole exercise: single-run
+numbers can land on either side of the "true" range, and you can't tell which without repeats.
 
 ## Qwen2.5-Coder-7B-Instruct
 
