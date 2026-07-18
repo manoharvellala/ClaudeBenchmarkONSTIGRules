@@ -1,0 +1,18 @@
+=== [14:55:15] Checking OpenSCAP / SCAP Security Guide install ===
+Installing openscap-scanner, scap-security-guide, python3 ...
+
+Installed:
+  GConf2-3.2.6-22.el8.x86_64                                                    
+  libtool-ltdl-2.4.6-25.el8.x86_64                                              
+  libxslt-1.1.32-6.4.el8_10.x86_64                                              
+  openscap-1.3.14-1.el8_10.alma.1.x86_64                                        
+  openscap-scanner-1.3.14-1.el8_10.alma.1.x86_64                                
+  python3-pip-9.0.3-24.el8.noarch                                               
+  python3-setuptools-39.2.0-9.el8_10.noarch                                     
+  python36-3.6.8-39.module_el8.10.0+3769+3838165b.x86_64                        
+  scap-security-guide-0.1.81-1.el8_10.alma.1.noarch                             
+  xml-common-0.6.3-50.el8.noarch                                                
+  xmlsec1-1.2.25-8.el8_10.x86_64                                                
+  xmlsec1-openssl-1.2.25-8.el8_10.x86_64                                        
+
+=== [14:55:25] Scoring glm4_9b_q4 (0/215 done so far) ===

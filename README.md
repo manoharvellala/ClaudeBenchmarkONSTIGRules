@@ -92,14 +92,15 @@ the same greedy output) and pooling the results into a 95% Wilson score interval
 |---|---|---|---|
 | CodeLlama-34B-Instruct FP16 (Ollama) | 21.2% (29/137) | **19.9%** (109/548, 4 runs) | 16.8% – 23.4% |
 | Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | **29.6%** (162/548, 4 runs) | 25.9% – 33.5% |
+| GLM4-9B (4-bit, Ollama) | 12.4% (17/137) | **12.2%** (67/548, 4 runs) | 9.7% – 15.2% |
 
-Both figures above are the "Combined Server-Safe" metric, same denominator basis as the headline
+All figures above are the "Combined Server-Safe" metric, same denominator basis as the headline
 table. Each pools the original single-run result together with 3 independent seeded runs
 (temp=0.2). CodeLlama-34B's single-run estimate sits inside its CI, near the upper edge.
 Qwen2.5-Coder-14B's sits just above its CI's upper edge (33.6% vs. 33.5%) — both original runs
-read as somewhat optimistic relative to the pooled result, a good illustration of why one run
-shouldn't be read as "the" number for a model. GLM4-9B (FP16 + 4-bit) and Qwen2.5-Coder-7B are queued for the same
-treatment; this table will grow as those finish.
+read as somewhat optimistic relative to the pooled result. GLM4-9B (4-bit)'s single-run estimate
+sits right in the middle of its (narrow) CI — the most stable of the three so far. GLM4-9B FP16
+and Qwen2.5-Coder-7B are queued for the same treatment; this table will grow as those finish.
 
 **How the 137/151 denominators work** (215 dataset rows down to 137/151): ~5 hazardous rules
 (crypto policy/FIPS/SSH cipher) are excluded via `--skip-hazardous` since they can sever SSH mid-run;
@@ -144,6 +145,23 @@ aggregate score since no per-rule results file was saved for it, plus 3 seeded t
 Per-category, pooled across all 4 runs: server config+kernel 117/319 = 36.7% (CI 31.6–42.1%),
 audit rules 45/229 = 19.7% (CI 15.0–25.3%), sshd config 27/56 = 48.2% (CI 35.7–61.0%),
 all verified applicable 189/604 = 31.3% (CI 27.7–35.1%).
+
+**GLM4-9B 4-bit (Ollama)** — 4 runs total (the original greedy temp=0 run, `glm4/results_glm4_9b_q4.jsonl`,
+plus 3 seeded temp=0.2 runs):
+
+| Run | Sampling | Combined server-safe |
+|---|---|---|
+| original | temp=0 (greedy) | 17/137 = 12.4% |
+| run1 | temp=0.2, seed=101 | 17/137 = 12.4% |
+| run2 | temp=0.2, seed=102 | 15/137 = 10.9% |
+| run3 | temp=0.2, seed=103 | 18/137 = 13.1% |
+| **pooled** | | **67/548 = 12.2%, 95% CI 9.7–15.2%** |
+
+Per-category, pooled across all 4 runs: server config+kernel 66/320 = 20.6% (CI 16.6–25.4%),
+audit rules 1/228 = 0.4% (CI 0.1–2.4%), sshd config 13/56 = 23.2% (CI 14.1–35.8%),
+all verified applicable 80/604 = 13.2% (CI 10.8–16.2%). Notably, GLM4-9B 4-bit is nearly
+incapable of writing correct `auditd` rules across every run (0-1 passes out of 57 each time) —
+the tightest, most consistent failure mode seen in this study so far.
 
 Reproduce it: `python3 benchmark/compute_ci.py --model <name> <results_or_log_file> [...]`. It
 accepts either standard `results_<model>.jsonl` grader output or a captured

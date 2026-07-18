@@ -45,12 +45,44 @@ of plausible outcomes rather than the middle.
 
 ## GLM4-9B FP16 (Ollama)
 
-Scoring in progress across all 3 droplets (run1/run2/run3). Not yet complete — table to be added
-once all 3 finish.
+Scoring in progress: run1 on 104.248.226.231 (started), run2/run3 not yet started. Table to be
+added once all 3 finish.
 
 ## GLM4-9B 4-bit (Ollama)
 
-Not yet started (queued after GLM4-9B FP16 on each droplet).
+**4 runs**: the original greedy run (temp=0, `glm4/results_glm4_9b_q4.jsonl`) plus 3 seeded runs
+(temp=0.2, seeds 101/102/103). Seeded runs scored on 3 dedicated droplets — run1
+(143.198.189.11) and run2 (104.248.226.231) on the first attempt, run3 (147.182.133.119) after an
+image reset and retry (its first attempt's droplet also lost SSH mid-scoring, same failure mode
+as every other batch in this study, but the retry completed and matched the original attempt's
+tally exactly: 168 scored, 22 passed both times).
+
+### Per-run (combined server-safe)
+
+| Run | Sampling | Source | Passed/Total | Rate |
+|---|---|---|---|---|
+| original | temp=0 (greedy) | `glm4/results_glm4_9b_q4.jsonl` | 17/137 | 12.4% |
+| run1 | temp=0.2, seed=101 | `ci_runs/run1/logs/run1_score_glm4_9b_q4.log` | 17/137 | 12.4% |
+| run2 | temp=0.2, seed=102 | `ci_runs/run2/logs/run2_score_glm4_9b_q4.log` | 15/137 | 10.9% |
+| run3 | temp=0.2, seed=103 | `ci_runs/run3/logs/run3_score_glm4_9b_q4.log` | 18/137 | 13.1% |
+
+### Per-category, pooled across all 4 runs
+
+| Category | Passed/Total | Rate | 95% Wilson CI |
+|---|---|---|---|
+| Server config + kernel | 66/320 | 20.6% | 16.6% – 25.4% |
+| Audit rules (`audit_rules_*`) | 1/228 | 0.4% | 0.1% – 2.4% |
+| sshd config | 13/56 | 23.2% | 14.1% – 35.8% |
+| **→ Combined server-safe** (server config+kernel + audit) | **67/548** | **12.2%** | **9.7% – 15.2%** |
+| **All verified applicable** (+ sshd + access_breaker) | **80/604** | **13.2%** | **10.8% – 16.2%** |
+
+Crypto/FIPS (`access_breaker`) and not-applicable rules contributed 0 rows — excluded from
+scoring by `--skip-hazardous`.
+
+Note: the original single-run estimate (12.4%, 17/137) sits almost exactly in the middle of the
+pooled CI — the most stable/representative single run of the three models scored so far.
+GLM4-9B 4-bit is nearly incapable of writing correct `auditd` rules across every single run (0 or
+1 pass out of 57 each time) — the tightest, most consistent failure mode in this study.
 
 ## Qwen2.5-Coder-14B-Instruct
 
