@@ -54,36 +54,40 @@ Not yet started (queued after GLM4-9B FP16 on each droplet).
 
 ## Qwen2.5-Coder-14B-Instruct
 
-**3 runs**, all seeded (temp=0.2, seeds 101/102/103) — no scored original-run results file was
-available in this repo to add as a 4th baseline. Scored on 3 dedicated droplets
-(64.227.31.210/67.205.142.115/67.205.134.254), one run each — same run{N}<->droplet mapping
-convention as CodeLlama, just a separate set of droplets.
+**4 runs**: the original greedy run (temp=0), using its already-published aggregate score since
+no per-rule results file was saved for it, plus 3 seeded runs (temp=0.2, seeds 101/102/103).
+Seeded runs scored on 3 dedicated droplets (64.227.31.210/67.205.142.115/67.205.134.254), one run
+each — same run{N}<->droplet mapping convention as CodeLlama, just a separate set of droplets.
 
 ### Per-run (combined server-safe)
 
 | Run | Sampling | Source | Passed/Total | Rate |
 |---|---|---|---|---|
+| original | temp=0 (greedy) | published aggregate (no per-rule file) | 46/137 | 33.6% |
 | run1 | temp=0.2, seed=101 | `ci_runs/run1/logs/run1_score_qwen25coder14b_fp16.log` | 42/137 | 30.7% |
 | run2 | temp=0.2, seed=102 | `ci_runs/run2/logs/run2_score_qwen25coder14b_fp16.log` | 32/137 | 23.4% |
 | run3 | temp=0.2, seed=103 | `ci_runs/run3/logs/run3_score_qwen25coder14b_fp16.log` | 42/137 | 30.7% |
 
-### Per-category, pooled across all 3 runs
+### Per-category, pooled across all 4 runs
 
 | Category | Passed/Total | Rate | 95% Wilson CI |
 |---|---|---|---|
-| Server config + kernel | 85/240 | 35.4% | 29.6% – 41.7% |
-| Audit rules (`audit_rules_*`) | 31/171 | 18.1% | 13.1% – 24.6% |
-| sshd config | 20/42 | 47.6% | 33.4% – 62.3% |
-| **→ Combined server-safe** (server config+kernel + audit) | **116/411** | **28.2%** | **24.1% – 32.8%** |
-| **All verified applicable** (+ sshd + access_breaker) | **136/453** | **30.0%** | **26.0% – 34.4%** |
+| Server config + kernel | 117/319 | 36.7% | 31.6% – 42.1% |
+| Audit rules (`audit_rules_*`) | 45/229 | 19.7% | 15.0% – 25.3% |
+| sshd config | 27/56 | 48.2% | 35.7% – 61.0% |
+| **→ Combined server-safe** (server config+kernel + audit) | **162/548** | **29.6%** | **25.9% – 33.5%** |
+| **All verified applicable** (+ sshd + access_breaker) | **189/604** | **31.3%** | **27.7% – 35.1%** |
 
 Crypto/FIPS (`access_breaker`) and not-applicable rules contributed 0 rows — excluded from
-scoring by `--skip-hazardous`.
+scoring by `--skip-hazardous`. The original run's per-category split (32/79 server config, 14/58
+audit) differs by one rule from the seeded runs' split (80/57) — the combined 137 total matches
+exactly, it's just one rule classified into a different bucket for that run; pooled as reported.
 
-Note: the originally published single-run estimate (33.6%, 46/137) sits above this CI's upper
-edge — the opposite lean from CodeLlama-34B (whose single run sat comfortably inside, near the
-upper edge). Illustrates the point of this whole exercise: single-run numbers can land on either
-side of the "true" range, and you can't tell which without repeats.
+Note: the originally published single-run estimate (33.6%, 46/137) sits just above this CI's
+upper edge (33.5%) — both CodeLlama-34B's and Qwen-14B's original single runs read on the
+optimistic side of their respective pooled results. Illustrates the point of this whole exercise:
+a single run's number isn't necessarily "wrong," but you can't tell where it sits in the plausible
+range without repeats.
 
 ## Qwen2.5-Coder-7B-Instruct
 

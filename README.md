@@ -91,13 +91,15 @@ the same greedy output) and pooling the results into a 95% Wilson score interval
 | Model | Single Run (temp=0) | Pooled (multi-run) | 95% CI |
 |---|---|---|---|
 | CodeLlama-34B-Instruct FP16 (Ollama) | 21.2% (29/137) | **19.9%** (109/548, 4 runs) | 16.8% – 23.4% |
-| Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | **28.2%** (116/411, 3 runs) | 24.1% – 32.8% |
+| Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | **29.6%** (162/548, 4 runs) | 25.9% – 33.5% |
 
 Both figures above are the "Combined Server-Safe" metric, same denominator basis as the headline
-table. CodeLlama-34B's single-run estimate sits inside its CI, near the upper edge. Qwen2.5-Coder-14B's
-sits *above* its CI's upper edge — the opposite lean, and a good illustration of why one run
-shouldn't be read as "the" number for a model. GLM4-9B (FP16 + 4-bit) and Qwen2.5-Coder-7B are
-queued for the same treatment; this table will grow as those finish.
+table. Each pools the original single-run result together with 3 independent seeded runs
+(temp=0.2). CodeLlama-34B's single-run estimate sits inside its CI, near the upper edge.
+Qwen2.5-Coder-14B's sits just above its CI's upper edge (33.6% vs. 33.5%) — both original runs
+read as somewhat optimistic relative to the pooled result, a good illustration of why one run
+shouldn't be read as "the" number for a model. GLM4-9B (FP16 + 4-bit) and Qwen2.5-Coder-7B are queued for the same
+treatment; this table will grow as those finish.
 
 **How the 137/151 denominators work** (215 dataset rows down to 137/151): ~5 hazardous rules
 (crypto policy/FIPS/SSH cipher) are excluded via `--skip-hazardous` since they can sever SSH mid-run;
@@ -128,19 +130,20 @@ Per-category, pooled across all 4 runs: server config+kernel 78/320 = 24.4% (CI 
 audit rules 31/228 = 13.6% (CI 9.7–18.7%), sshd config 14/56 = 25.0% (CI 15.5–37.7%),
 all verified applicable 123/604 = 20.4% (CI 17.3–23.8%).
 
-**Qwen2.5-Coder-14B-Instruct** — 3 seeded temp=0.2 runs (no scored original-run results file was
-available in this repo to add as a 4th):
+**Qwen2.5-Coder-14B-Instruct** — 4 runs total (the original greedy temp=0 run, using its published
+aggregate score since no per-rule results file was saved for it, plus 3 seeded temp=0.2 runs):
 
 | Run | Sampling | Combined server-safe |
 |---|---|---|
+| original | temp=0 (greedy) | 46/137 = 33.6% |
 | run1 | temp=0.2, seed=101 | 42/137 = 30.7% |
 | run2 | temp=0.2, seed=102 | 32/137 = 23.4% |
 | run3 | temp=0.2, seed=103 | 42/137 = 30.7% |
-| **pooled** | | **116/411 = 28.2%, 95% CI 24.1–32.8%** |
+| **pooled** | | **162/548 = 29.6%, 95% CI 25.9–33.5%** |
 
-Per-category, pooled across all 3 runs: server config+kernel 85/240 = 35.4% (CI 29.6–41.7%),
-audit rules 31/171 = 18.1% (CI 13.1–24.6%), sshd config 20/42 = 47.6% (CI 33.4–62.3%),
-all verified applicable 136/453 = 30.0% (CI 26.0–34.4%).
+Per-category, pooled across all 4 runs: server config+kernel 117/319 = 36.7% (CI 31.6–42.1%),
+audit rules 45/229 = 19.7% (CI 15.0–25.3%), sshd config 27/56 = 48.2% (CI 35.7–61.0%),
+all verified applicable 189/604 = 31.3% (CI 27.7–35.1%).
 
 Reproduce it: `python3 benchmark/compute_ci.py --model <name> <results_or_log_file> [...]`. It
 accepts either standard `results_<model>.jsonl` grader output or a captured
