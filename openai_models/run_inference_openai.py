@@ -41,7 +41,7 @@ def extract_bash(text):
 def solve(client, model, prompt, max_tokens, temperature, reasoning_effort):
     kwargs = dict(
         model=model,
-        max_tokens=max_tokens,
+        max_completion_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
     )
     # o-series models use temperature=1 and support reasoning_effort

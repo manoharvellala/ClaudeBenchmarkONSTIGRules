@@ -1,0 +1,183 @@
+apply_then_scan: 0 already recorded; applying 88 of 88 scripts (no live scan during this pass)...
+[apply 1/88] RHEL-08-010359 package_aide_installed: script exit 0
+[apply 2/88] RHEL-08-010359 aide_build_database: script exit 0
+[apply 3/88] RHEL-08-030650 aide_check_audit_tools: script exit 0
+[apply 4/88] RHEL-08-020050 dconf_gnome_lock_screen_on_smartcard_removal: script exit 0
+[apply 5/88] RHEL-08-020060 dconf_gnome_screensaver_idle_delay: script exit 1
+[apply 6/88] RHEL-08-020031 dconf_gnome_screensaver_lock_delay: script exit 127
+[apply 7/88] RHEL-08-020030 dconf_gnome_screensaver_lock_enabled: script exit 127
+[apply 8/88] RHEL-08-040171 dconf_gnome_disable_ctrlaltdel_reboot: script exit 127
+[apply 9/88] RHEL-08-010049 dconf_gnome_banner_enabled: script exit 127
+[apply 10/88] RHEL-08-010050 dconf_gnome_login_banner_text: script exit 127
+[apply 11/88] RHEL-08-020021 accounts_passwords_pam_faillock_audit: script exit 0
+[apply 12/88] RHEL-08-020011 accounts_passwords_pam_faillock_deny: script exit 0
+[apply 13/88] RHEL-08-020013 accounts_passwords_pam_faillock_interval: script exit 0
+[apply 14/88] RHEL-08-020019 accounts_passwords_pam_faillock_silent: script exit 0
+[apply 15/88] RHEL-08-020015 accounts_passwords_pam_faillock_unlock_time: script exit 0
+[apply 16/88] RHEL-08-020130 accounts_password_pam_dcredit: script exit 0
+[apply 17/88] RHEL-08-020300 accounts_password_pam_dictcheck: script exit 0
+[apply 18/88] RHEL-08-020170 accounts_password_pam_difok: script exit 0
+[apply 19/88] RHEL-08-020120 accounts_password_pam_lcredit: script exit 0
+[apply 20/88] RHEL-08-020230 accounts_password_pam_minlen: script exit 0
+[apply 21/88] RHEL-08-020280 accounts_password_pam_ocredit: script exit 0
+[apply 22/88] RHEL-08-020110 accounts_password_pam_ucredit: script exit 0
+[apply 23/88] RHEL-08-040170 disable_ctrlaltdel_reboot: script exit 0
+[apply 24/88] RHEL-08-010410 package_opensc_installed: script exit 0
+[apply 25/88] RHEL-08-020260 account_disable_post_pw_expiration: script exit 0
+[apply 26/88] RHEL-08-020200 accounts_maximum_age_login_defs: script exit 0
+[apply 27/88] RHEL-08-020190 accounts_minimum_age_login_defs: script exit 0
+[apply 28/88] RHEL-08-020331 no_empty_passwords: script exit 0
+[apply 29/88] RHEL-08-020024 accounts_max_concurrent_login_sessions: script exit 0
+[apply 30/88] RHEL-08-020351 accounts_umask_etc_login_defs: script exit 0
+[apply 31/88] RHEL-08-010070 rsyslog_remote_access_monitoring: script exit 0
+[apply 32/88] RHEL-08-010670 service_kdump_disabled: script exit 0
+[apply 33/88] RHEL-08-030740 chronyd_or_ntpd_set_maxpoll: script exit 0
+[apply 34/88] RHEL-08-010200 sshd_set_keepalive: script exit 0
+[apply 35/88] RHEL-08-010201 sshd_set_idle_timeout: script exit 0
+[apply 36/88] RHEL-08-020330 sshd_disable_empty_passwords: script exit 0
+[apply 37/88] RHEL-08-040340 sshd_disable_x11_forwarding: script exit 0
+[apply 38/88] RHEL-08-010830 sshd_do_not_permit_user_env: script exit 0
+[apply 39/88] RHEL-08-040341 sshd_x11_use_localhost: script exit 0
+[apply 40/88] RHEL-08-020250 sssd_enable_smartcards: script exit 100
+[apply 41/88] RHEL-08-030121 audit_rules_immutable: script exit 0
+[apply 42/88] RHEL-08-030171 audit_rules_sudoers: script exit 0
+[apply 43/88] RHEL-08-030172 audit_rules_sudoers_d: script exit 0
+[apply 44/88] RHEL-08-030000 audit_rules_suid_privilege_function: script exit 0
+[apply 45/88] RHEL-08-030170 audit_rules_usergroup_modification_group: script exit 0
+[apply 46/88] RHEL-08-030160 audit_rules_usergroup_modification_gshadow: script exit 0
+[apply 47/88] RHEL-08-030140 audit_rules_usergroup_modification_opasswd: script exit 0
+[apply 48/88] RHEL-08-030150 audit_rules_usergroup_modification_passwd: script exit 0
+[apply 49/88] RHEL-08-030130 audit_rules_usergroup_modification_shadow: script exit 0
+[apply 50/88] RHEL-08-030490 audit_rules_dac_modification_chmod: script exit 0
+[apply 51/88] RHEL-08-030480 audit_rules_dac_modification_chown: script exit 0
+[apply 52/88] RHEL-08-030490 audit_rules_dac_modification_fchmod: script exit 0
+[apply 53/88] RHEL-08-030490 audit_rules_dac_modification_fchmodat: script exit 0
+[apply 54/88] RHEL-08-030480 audit_rules_dac_modification_fchown: script exit 0
+[apply 55/88] RHEL-08-030480 audit_rules_dac_modification_fchownat: script exit 0
+[apply 56/88] RHEL-08-030200 audit_rules_dac_modification_fremovexattr: script exit 0
+[apply 57/88] RHEL-08-030200 audit_rules_dac_modification_fsetxattr: script exit 0
+[apply 58/88] RHEL-08-030480 audit_rules_dac_modification_lchown: script exit 1
+[apply 59/88] RHEL-08-030200 audit_rules_dac_modification_lremovexattr: script exit 0
+[apply 60/88] RHEL-08-030200 audit_rules_dac_modification_lsetxattr: script exit 0
+[apply 61/88] RHEL-08-030200 audit_rules_dac_modification_removexattr: script exit 0
+[apply 62/88] RHEL-08-030200 audit_rules_dac_modification_setxattr: script exit 0
+[apply 63/88] RHEL-08-030570 audit_rules_execution_chacl: script exit 0
+[apply 64/88] RHEL-08-030330 audit_rules_execution_setfacl: script exit 0
+[apply 65/88] RHEL-08-030260 audit_rules_execution_chcon: script exit 0
+[apply 66/88] RHEL-08-030361 audit_rules_file_deletion_events_rename: script exit 0
+[apply 67/88] RHEL-08-030361 audit_rules_file_deletion_events_renameat: script exit 0
+[apply 68/88] RHEL-08-030361 audit_rules_file_deletion_events_rmdir: script exit 0
+[apply 69/88] RHEL-08-030361 audit_rules_file_deletion_events_unlink: script exit 0
+[apply 70/88] RHEL-08-030361 audit_rules_file_deletion_events_unlinkat: script exit 0
+[apply 71/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_creat: script exit 0
+[apply 72/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_ftruncate: script exit 0
+[apply 73/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_open: script exit 0
+[apply 74/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_open_by_handle_at: script exit 0
+[apply 75/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_openat: script exit 0
+[apply 76/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_truncate: script exit 0
+[apply 77/88] RHEL-08-030390 audit_rules_kernel_module_loading_delete: script exit 1
+[apply 78/88] RHEL-08-030360 audit_rules_kernel_module_loading_finit: script exit 0
+[apply 79/88] RHEL-08-030360 audit_rules_kernel_module_loading_init: script exit 0
+[apply 80/88] RHEL-08-030600 audit_rules_login_events_lastlog: script exit 0
+[apply 81/88] RHEL-08-030580 audit_rules_privileged_commands_kmod: script exit 0
+[apply 82/88] RHEL-08-030280 audit_rules_privileged_commands_ssh_agent: script exit 0
+[apply 83/88] RHEL-08-030320 audit_rules_privileged_commands_ssh_keysign: script exit 0
+[apply 84/88] RHEL-08-030310 audit_rules_privileged_commands_unix_update: script exit 0
+[apply 85/88] RHEL-08-030560 audit_rules_privileged_commands_usermod: script exit 0
+[apply 86/88] RHEL-08-030731 auditd_data_retention_space_left_action: script exit 0
+[apply 87/88] RHEL-08-030730 auditd_data_retention_space_left_percentage: script exit 0
+[apply 88/88] RHEL-08-030610 file_permissions_etc_audit_rulesd: script exit 0
+
+All scripts applied. Now scanning 88 rules in a single sweep...
+[scan 1/88] RHEL-08-010359 package_aide_installed: fail -> pass  PASS (exit 0)
+[scan 2/88] RHEL-08-010359 aide_build_database: fail -> pass  PASS (exit 0)
+[scan 3/88] RHEL-08-030650 aide_check_audit_tools: fail -> fail  fail (exit 0)
+[scan 4/88] RHEL-08-020050 dconf_gnome_lock_screen_on_smartcard_removal: fail -> notapplicable  fail (exit 0)
+[scan 5/88] RHEL-08-020060 dconf_gnome_screensaver_idle_delay: fail -> notapplicable  fail (exit 1)
+[scan 6/88] RHEL-08-020031 dconf_gnome_screensaver_lock_delay: fail -> notapplicable  fail (exit 127)
+[scan 7/88] RHEL-08-020030 dconf_gnome_screensaver_lock_enabled: fail -> notapplicable  fail (exit 127)
+[scan 8/88] RHEL-08-040171 dconf_gnome_disable_ctrlaltdel_reboot: fail -> notapplicable  fail (exit 127)
+[scan 9/88] RHEL-08-010049 dconf_gnome_banner_enabled: fail -> notapplicable  fail (exit 127)
+[scan 10/88] RHEL-08-010050 dconf_gnome_login_banner_text: fail -> notapplicable  fail (exit 127)
+[scan 11/88] RHEL-08-020021 accounts_passwords_pam_faillock_audit: fail -> fail  fail (exit 0)
+[scan 12/88] RHEL-08-020011 accounts_passwords_pam_faillock_deny: fail -> fail  fail (exit 0)
+[scan 13/88] RHEL-08-020013 accounts_passwords_pam_faillock_interval: fail -> fail  fail (exit 0)
+[scan 14/88] RHEL-08-020019 accounts_passwords_pam_faillock_silent: fail -> fail  fail (exit 0)
+[scan 15/88] RHEL-08-020015 accounts_passwords_pam_faillock_unlock_time: fail -> fail  fail (exit 0)
+[scan 16/88] RHEL-08-020130 accounts_password_pam_dcredit: fail -> pass  PASS (exit 0)
+[scan 17/88] RHEL-08-020300 accounts_password_pam_dictcheck: fail -> pass  PASS (exit 0)
+[scan 18/88] RHEL-08-020170 accounts_password_pam_difok: fail -> fail  fail (exit 0)
+[scan 19/88] RHEL-08-020120 accounts_password_pam_lcredit: fail -> fail  fail (exit 0)
+[scan 20/88] RHEL-08-020230 accounts_password_pam_minlen: fail -> pass  PASS (exit 0)
+[scan 21/88] RHEL-08-020280 accounts_password_pam_ocredit: fail -> fail  fail (exit 0)
+[scan 22/88] RHEL-08-020110 accounts_password_pam_ucredit: fail -> pass  PASS (exit 0)
+[scan 23/88] RHEL-08-040170 disable_ctrlaltdel_reboot: fail -> fail  fail (exit 0)
+[scan 24/88] RHEL-08-010410 package_opensc_installed: fail -> pass  PASS (exit 0)
+[scan 25/88] RHEL-08-020260 account_disable_post_pw_expiration: fail -> pass  PASS (exit 0)
+[scan 26/88] RHEL-08-020200 accounts_maximum_age_login_defs: fail -> pass  PASS (exit 0)
+[scan 27/88] RHEL-08-020190 accounts_minimum_age_login_defs: fail -> pass  PASS (exit 0)
+[scan 28/88] RHEL-08-020331 no_empty_passwords: fail -> fail  fail (exit 0)
+[scan 29/88] RHEL-08-020024 accounts_max_concurrent_login_sessions: fail -> pass  PASS (exit 0)
+[scan 30/88] RHEL-08-020351 accounts_umask_etc_login_defs: fail -> pass  PASS (exit 0)
+[scan 31/88] RHEL-08-010070 rsyslog_remote_access_monitoring: fail -> pass  PASS (exit 0)
+[scan 32/88] RHEL-08-010670 service_kdump_disabled: fail -> pass  PASS (exit 0)
+[scan 33/88] RHEL-08-030740 chronyd_or_ntpd_set_maxpoll: fail -> notapplicable  fail (exit 0)
+[scan 34/88] RHEL-08-010200 sshd_set_keepalive: fail -> fail  fail (exit 0)
+[scan 35/88] RHEL-08-010201 sshd_set_idle_timeout: fail -> fail  fail (exit 0)
+[scan 36/88] RHEL-08-020330 sshd_disable_empty_passwords: fail -> pass  PASS (exit 0)
+[scan 37/88] RHEL-08-040340 sshd_disable_x11_forwarding: fail -> fail  fail (exit 0)
+[scan 38/88] RHEL-08-010830 sshd_do_not_permit_user_env: fail -> pass  PASS (exit 0)
+[scan 39/88] RHEL-08-040341 sshd_x11_use_localhost: fail -> pass  PASS (exit 0)
+[scan 40/88] RHEL-08-020250 sssd_enable_smartcards: fail -> fail  fail (exit 100)
+[scan 41/88] RHEL-08-030121 audit_rules_immutable: fail -> notapplicable  fail (exit 0)
+[scan 42/88] RHEL-08-030171 audit_rules_sudoers: fail -> notapplicable  fail (exit 0)
+[scan 43/88] RHEL-08-030172 audit_rules_sudoers_d: fail -> notapplicable  fail (exit 0)
+[scan 44/88] RHEL-08-030000 audit_rules_suid_privilege_function: fail -> notapplicable  fail (exit 0)
+[scan 45/88] RHEL-08-030170 audit_rules_usergroup_modification_group: fail -> notapplicable  fail (exit 0)
+[scan 46/88] RHEL-08-030160 audit_rules_usergroup_modification_gshadow: fail -> notapplicable  fail (exit 0)
+[scan 47/88] RHEL-08-030140 audit_rules_usergroup_modification_opasswd: fail -> notapplicable  fail (exit 0)
+[scan 48/88] RHEL-08-030150 audit_rules_usergroup_modification_passwd: fail -> notapplicable  fail (exit 0)
+[scan 49/88] RHEL-08-030130 audit_rules_usergroup_modification_shadow: fail -> notapplicable  fail (exit 0)
+[scan 50/88] RHEL-08-030490 audit_rules_dac_modification_chmod: fail -> notapplicable  fail (exit 0)
+[scan 51/88] RHEL-08-030480 audit_rules_dac_modification_chown: fail -> notapplicable  fail (exit 0)
+[scan 52/88] RHEL-08-030490 audit_rules_dac_modification_fchmod: fail -> notapplicable  fail (exit 0)
+[scan 53/88] RHEL-08-030490 audit_rules_dac_modification_fchmodat: fail -> notapplicable  fail (exit 0)
+[scan 54/88] RHEL-08-030480 audit_rules_dac_modification_fchown: fail -> notapplicable  fail (exit 0)
+[scan 55/88] RHEL-08-030480 audit_rules_dac_modification_fchownat: fail -> notapplicable  fail (exit 0)
+[scan 56/88] RHEL-08-030200 audit_rules_dac_modification_fremovexattr: fail -> notapplicable  fail (exit 0)
+[scan 57/88] RHEL-08-030200 audit_rules_dac_modification_fsetxattr: fail -> notapplicable  fail (exit 0)
+[scan 58/88] RHEL-08-030480 audit_rules_dac_modification_lchown: fail -> notapplicable  fail (exit 1)
+[scan 59/88] RHEL-08-030200 audit_rules_dac_modification_lremovexattr: fail -> notapplicable  fail (exit 0)
+[scan 60/88] RHEL-08-030200 audit_rules_dac_modification_lsetxattr: fail -> notapplicable  fail (exit 0)
+[scan 61/88] RHEL-08-030200 audit_rules_dac_modification_removexattr: fail -> notapplicable  fail (exit 0)
+[scan 62/88] RHEL-08-030200 audit_rules_dac_modification_setxattr: fail -> notapplicable  fail (exit 0)
+[scan 63/88] RHEL-08-030570 audit_rules_execution_chacl: fail -> notapplicable  fail (exit 0)
+[scan 64/88] RHEL-08-030330 audit_rules_execution_setfacl: fail -> notapplicable  fail (exit 0)
+[scan 65/88] RHEL-08-030260 audit_rules_execution_chcon: fail -> notapplicable  fail (exit 0)
+[scan 66/88] RHEL-08-030361 audit_rules_file_deletion_events_rename: fail -> notapplicable  fail (exit 0)
+[scan 67/88] RHEL-08-030361 audit_rules_file_deletion_events_renameat: fail -> notapplicable  fail (exit 0)
+[scan 68/88] RHEL-08-030361 audit_rules_file_deletion_events_rmdir: fail -> notapplicable  fail (exit 0)
+[scan 69/88] RHEL-08-030361 audit_rules_file_deletion_events_unlink: fail -> notapplicable  fail (exit 0)
+[scan 70/88] RHEL-08-030361 audit_rules_file_deletion_events_unlinkat: fail -> notapplicable  fail (exit 0)
+[scan 71/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_creat: fail -> notapplicable  fail (exit 0)
+[scan 72/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_ftruncate: fail -> notapplicable  fail (exit 0)
+[scan 73/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_open: fail -> notapplicable  fail (exit 0)
+[scan 74/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_open_by_handle_at: fail -> notapplicable  fail (exit 0)
+[scan 75/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_openat: fail -> notapplicable  fail (exit 0)
+[scan 76/88] RHEL-08-030420 audit_rules_unsuccessful_file_modification_truncate: fail -> notapplicable  fail (exit 0)
+[scan 77/88] RHEL-08-030390 audit_rules_kernel_module_loading_delete: fail -> notapplicable  fail (exit 1)
+[scan 78/88] RHEL-08-030360 audit_rules_kernel_module_loading_finit: fail -> notapplicable  fail (exit 0)
+[scan 79/88] RHEL-08-030360 audit_rules_kernel_module_loading_init: fail -> notapplicable  fail (exit 0)
+[scan 80/88] RHEL-08-030600 audit_rules_login_events_lastlog: fail -> notapplicable  fail (exit 0)
+[scan 81/88] RHEL-08-030580 audit_rules_privileged_commands_kmod: fail -> notapplicable  fail (exit 0)
+[scan 82/88] RHEL-08-030280 audit_rules_privileged_commands_ssh_agent: fail -> notapplicable  fail (exit 0)
+[scan 83/88] RHEL-08-030320 audit_rules_privileged_commands_ssh_keysign: fail -> notapplicable  fail (exit 0)
+[scan 84/88] RHEL-08-030310 audit_rules_privileged_commands_unix_update: fail -> notapplicable  fail (exit 0)
+[scan 85/88] RHEL-08-030560 audit_rules_privileged_commands_usermod: fail -> notapplicable  fail (exit 0)
+[scan 86/88] RHEL-08-030731 auditd_data_retention_space_left_action: fail -> notapplicable  fail (exit 0)
+[scan 87/88] RHEL-08-030730 auditd_data_retention_space_left_percentage: fail -> notapplicable  fail (exit 0)
+[scan 88/88] RHEL-08-030610 file_permissions_etc_audit_rulesd: fail -> pass  PASS (exit 0)
+
+==== SCORE ====
+recorded: 88 | passed: 18
+Results -> results_gpt5_4_mini_ubuntu2404.jsonl

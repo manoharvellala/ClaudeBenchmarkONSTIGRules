@@ -25,7 +25,8 @@ reference-script diffing — a compliance scanner is the oracle.
 > Every row above is a single run (temp=0, greedy). A confidence-interval study re-running some
 > of these models multiple times is underway — see
 > **[Confidence Interval Results](#confidence-interval-results)** below for how much a single run
-> can move.
+> can move. The benchmark has also been ported to Ubuntu 24.04 with zero harness code changes —
+> see **[Cross-OS Generalizability](#cross-os-generalizability-ubuntu-2404)** below.
 >
 > Full breakdown in **[benchmark/RESULTS.md](benchmark/RESULTS.md)**.
 
@@ -212,6 +213,59 @@ between "functionally hardened" and "hardened the exact way this OVAL check veri
 non-obvious required value, a specific knob among valid alternatives (`login.defs` vs `pam`), or an
 exact audit key string. This mirrors real compliance: a correctly-hardened box can still be flagged
 non-compliant because the scanner expected one specific value/mechanism.
+
+---
+
+### Cross-OS Generalizability (Ubuntu 24.04)
+
+**The harness required no code changes to port from RHEL 8 to Ubuntu 24.04** — only the target OVAL
+datastream (`ssg-rhel8-ds.xml` → `ssg-ubuntu2404-ds.xml`) and the OS name in the prompt text. Scoring
+logic — live script execution, live OVAL re-scan, `fail → pass` as the sole pass criterion — is
+identical in both tracks; nothing in the harness encodes RHEL-specific assumptions. Models
+corroborated this independently: without being told to, they emitted `apt`/`dpkg` for Ubuntu and
+`yum`/`rpm` for RHEL, correctly inferring OS-appropriate tooling from the prompt alone. All 5 models
+in the RHEL8 study have now had their Ubuntu-generated scripts executed and OVAL-verified end-to-end
+(each scored on its own freshly-provisioned droplet — see note below):
+
+| Model | Server config + kernel | Audit rules | sshd config | Total |
+|---|---|---|---|---|
+| Claude Opus 4.8 | 14/35 (40.0%) | 42/47 (89.4%) | 4/6 (66.7%) | **60/88 (68.2%)** |
+| GPT-4o | 15/35 (42.9%) | 36/47 (76.6%) | 4/6 (66.7%) | **55/88 (62.5%)** |
+| Claude Sonnet 5 | 16/35 (45.7%) | 35/47 (74.5%) | 2/6 (33.3%) | **53/88 (60.2%)** |
+| gpt-5.4-mini | 15/35 (42.9%) | 0/47 (0.0%)\* | 3/6 (50.0%) | **18/88 (20.5%)**\* |
+| Claude Haiku 4.5 | 8/35 (22.9%) | 0/47 (0.0%)\* | 3/6 (50.0%) | **11/88 (12.5%)**\* |
+
+Real, non-trivial pass rates across models — evidence the ported pipeline produces genuine signal,
+not degenerate all-pass/all-fail output.
+
+\* Two models' audit-category scores were deflated by the same underlying failure mode — a script
+broke shared system state, poisoning every `audit_rules_*` OVAL check evaluated after it (mirrors
+the "one script poisons everything scored after it" pattern seen repeatedly in the RHEL8 CI study,
+there via `sshd_config`). For **gpt-5.4-mini**, its `sssd_enable_smartcards` script exited non-zero
+and left the box unable to resolve subsequent audit checks. For **Claude Haiku 4.5**, the same rule's
+script had a bash syntax error (`unexpected EOF while looking for matching backtick`) that left an
+orphaned `apt-get` process holding the dpkg lock — every later script's own `apt-get install` call
+then failed with `Could not get lock /var/lib/dpkg/lock-frontend`, cascading into `notapplicable`
+for the rest of the audit rules. Both models' 0/47 audit scores reflect that environment corruption,
+not a genuine measurement of either model's ability to write audit rules, and should be read with
+this caveat — notably, the same `sssd_enable_smartcards` rule was the trigger in both cases.
+
+*Methodology note:* each model's Ubuntu scripts must be applied and scanned on a freshly-provisioned
+droplet, never a box a previous model has already run on — otherwise an earlier model's successful
+fix could make a later model's script look like it passed a rule it never actually touched. Every
+number in this table comes from a clean, single-model VM.
+
+**Why the Ubuntu rule count is smaller:** RHEL 8's DISA STIG defines 453 controls; Ubuntu 24.04's
+Canonical STIG (v1r1) defines 275 — a maturity gap in the underlying compliance guides, not in this
+benchmark. Of the 168 rule concepts in the RHEL8 benchmark's scoreable pool, only 88 (52%) have a
+same-named control in Ubuntu's STIG; the remaining 80 encode RHEL-specific mechanisms (SELinux,
+`authselect`) with no Ubuntu analogue. The gap is proportional across every category: server-config
+narrows from 97 candidates to 35, audit from 57 to 47, sshd from 14 to 6. A further 8 of the 88
+resolve to `notapplicable` under a live Ubuntu scan (the same GNOME/desktop-rule pattern seen on
+headless RHEL8 hosts throughout this study), leaving ~80 as the true Ubuntu-verified-applicable set.
+Ubuntu results measure model performance on a narrower, non-identical rule subset — evidence the
+*harness* transfers cleanly across OS families even though the *content coverage* of the two
+official STIGs does not.
 
 ---
 
