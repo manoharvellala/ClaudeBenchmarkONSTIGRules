@@ -39,6 +39,7 @@ def main():
     ap.add_argument("--datastream", required=True)
     ap.add_argument("--skip-hazardous", action="store_true")
     ap.add_argument("--out", default="results.jsonl")
+    ap.add_argument("--limit", type=int, default=0, help="0 = all candidates")
     args = ap.parse_args()
 
     if os.geteuid() != 0:
@@ -69,6 +70,8 @@ def main():
         candidates.append(p)
     total = len(candidates)
     todo = [p for p in candidates if p["rule_id"] not in done]
+    if args.limit:
+        todo = todo[:args.limit]
 
     print(f"apply_then_scan: {len(done)} already recorded; applying {len(todo)} of {total} scripts "
           f"(no live scan during this pass)...", flush=True)
