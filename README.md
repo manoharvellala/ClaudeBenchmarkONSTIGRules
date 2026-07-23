@@ -15,6 +15,8 @@ reference-script diffing — a compliance scanner is the oracle.
 > |---|---|---|
 > | **Claude Opus 4.8** | **88.8%** (143/161)\* | **83.9%** (151/180)\* |
 > | Claude Opus 4.7 | 81.0% (111/137) | 80.8% (122/151) |
+> | Claude Sonnet 4.5 | 76.6% (105/137) | 75.5% (114/151) |
+> | Claude Opus 4.5 | 75.9% (104/137) | 72.8% (110/151) |
 > | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
 > | Claude Sonnet 5 | 59.9% (82/137) | 58.9% (89/151) |
 > | DeepSeek-Coder-33B-Instruct FP16 (Ollama) | 35.8% (49/137) | 36.4% (55/151) |
@@ -65,15 +67,15 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 ### Model Comparison
 
-| Bucket | Claude Opus 4.8 | Claude Opus 4.7 | GPT-4o | Claude Sonnet 5 | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16 | Qwen2.5-Coder-7B | CodeLlama-7B FP16 | GLM4-9B FP16 | GLM4-9B (4-bit) |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 71/80 = **88.8%** | 54/79 = **68.4%** | 49/80 = **61.2%**\*\* | 36/80 = **45.0%** | 32/79 = **40.5%** | 21/80 = **26.2%** | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 40/57 = **70.2%** | 36/58 = **62.1%** | 33/57 = **57.9%**\*\* | 13/57 = **22.8%** | 14/58 = **24.1%** | 8/57 = **14.0%** | 1/58 = **1.7%** | 3/57 = **5.3%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
-| **→ Combined server-safe** | **143/161 = 88.8%**\* | **111/137 = 81.0%** | **90/137 = 65.7%** | **82/137 = 59.9%**\*\* | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
-| sshd config | 8/15 = 53.3% | 11/14 = **78.6%** | 10/14 = **71.4%** | 7/14 = 50.0% | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 5/14 = **35.7%** | 3/14 = **21.4%** | 2/14 = **14.3%** |
-| Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — | — | — | — |
-| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%**\* | **122/151 = 80.8%** | **100/151 = 66.2%** | **89/151 = 58.9%**\*\* | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **25/151 = 16.6%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
+| Bucket | Claude Opus 4.8 | Claude Opus 4.7 | Claude Sonnet 4.5 | Claude Opus 4.5 | GPT-4o | Claude Sonnet 5 | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16 | Qwen2.5-Coder-7B | CodeLlama-7B FP16 | GLM4-9B FP16 | GLM4-9B (4-bit) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Server config + kernel | 106/117 = **90.6%** | 71/80 = **88.8%** | 59/80 = **73.8%** | 67/80 = **83.8%** | 54/79 = **68.4%** | 49/80 = **61.2%**\*\* | 36/80 = **45.0%** | 32/79 = **40.5%** | 21/80 = **26.2%** | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 40/57 = **70.2%** | 46/57 = **80.7%** | 37/57 = **64.9%** | 36/58 = **62.1%** | 33/57 = **57.9%**\*\* | 13/57 = **22.8%** | 14/58 = **24.1%** | 8/57 = **14.0%** | 1/58 = **1.7%** | 3/57 = **5.3%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
+| **→ Combined server-safe** | **143/161 = 88.8%**\* | **111/137 = 81.0%** | **105/137 = 76.6%** | **104/137 = 75.9%** | **90/137 = 65.7%** | **82/137 = 59.9%**\*\* | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
+| sshd config | 8/15 = 53.3% | 11/14 = **78.6%** | 9/14 = **64.3%** | 6/14 = **42.9%** | 10/14 = **71.4%** | 7/14 = 50.0% | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 5/14 = **35.7%** | 3/14 = **21.4%** | 2/14 = **14.3%** |
+| Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — | — | — | — | — | — |
+| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
+| **All verified applicable** | **151/180 = 83.9%**\* | **122/151 = 80.8%** | **114/151 = 75.5%** | **110/151 = 72.8%** | **100/151 = 66.2%** | **89/151 = 58.9%**\*\* | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **25/151 = 16.6%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
 
 **Key findings:**
 - Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
@@ -81,6 +83,10 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
   on that basis (Opus 4.8's 88.8% uses a larger, non-standard denominator from its original scoring
   pass — see note above the headline table). Opus 4.7 is also the best of every model tested on sshd
   (78.6%).
+- Claude Sonnet 4.5 scores **76.6%** and Claude Opus 4.5 scores **75.9%** — both close behind Opus
+  4.7, and Sonnet 4.5 actually edges out Opus 4.5 here, the only case in this study where a Sonnet
+  model outscores an Opus model. Sonnet 4.5 also posts the second-best audit-rules score of any
+  model (80.7%, behind only Opus 4.8's 84.1%).
 - GPT-4o scores **65.7%** — solid mid-tier; notably best on sshd (71.4%) but weaker on audit rules (62.1%).
 - Claude Sonnet 5 scores **59.9%**\*\* — behind GPT-4o but well ahead of every open-source model.
 - DeepSeek-Coder-33B (FP16) scores **35.8%** — narrowly ahead of Qwen2.5-Coder-14B, with the strongest sshd score (42.9%) among open-source models.
