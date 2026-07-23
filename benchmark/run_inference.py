@@ -74,7 +74,12 @@ def main():
                           f"to {args.out}. Top up credits and re-run the SAME command to resume.",
                           flush=True)
                     break
-                raise
+                if "content filtering" in str(e).lower():
+                    print(f"[{len(done)+i}/{len(rows)}] {r['stig_id']} {r['rule_id']}: "
+                          f"blocked by content filtering policy, recording as empty", flush=True)
+                    raw = ""
+                else:
+                    raise
             script = extract_bash(raw)
             fenced = "```bash" in raw or "```sh" in raw or "```" in raw
             pred = {

@@ -1,0 +1,28 @@
+215 gradeable rows x 6 models = 1290 requests
+Submitting batch of 1290 requests...
+batch id: msgbatch_01Fw3bEDLpjRPwpnDh294nDM -- polling...
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=in_progress counts=MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=1290, succeeded=0)
+  status=ended counts=MessageBatchRequestCounts(canceled=0, errored=35, expired=0, processing=0, succeeded=1255)
+
+==== SUMMARY ====
+claude-opus-4-7: 215/215 cleanly extracted -> predictions_claude-opus-4-7.jsonl
+claude-opus-4-5-20251101: 182/215 cleanly extracted -> predictions_claude-opus-4-5-20251101.jsonl
+claude-sonnet-5: 193/215 cleanly extracted -> predictions_claude-sonnet-5.jsonl
+claude-sonnet-4-5-20250929: 214/215 cleanly extracted -> predictions_claude-sonnet-4-5-20250929.jsonl
+claude-haiku-4-5-20251001: 214/215 cleanly extracted -> predictions_claude-haiku-4-5-20251001.jsonl
+claude-fable-5: 203/215 cleanly extracted -> predictions_claude-fable-5.jsonl

@@ -19,6 +19,7 @@ reference-script diffing — a compliance scanner is the oracle.
 > | Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | 35.1% (53/151) |
 > | CodeLlama-34B-Instruct FP16 (Ollama) | 21.2% (29/137) | 21.2% (32/151) |
 > | Qwen2.5-Coder-7B-Instruct | 14.6% (20/137) | 15.9% (24/151) |
+> | CodeLlama-7B-Instruct FP16 (Ollama) | 14.6% (20/137) | 16.6% (25/151) |
 > | GLM4-9B FP16 (Ollama) | 13.1% (18/137) | 13.9% (21/151) |
 > | GLM4-9B (4-bit, Ollama) | 12.4% (17/137) | 12.6% (19/151) |
 >
@@ -57,15 +58,15 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 ### Model Comparison
 
-| Bucket | Claude Opus 4.8 | GPT-4o | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16 | Qwen2.5-Coder-7B | GLM4-9B FP16 | GLM4-9B (4-bit) |
-|---|---|---|---|---|---|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 36/80 = **45.0%** | 32/79 = **40.5%** | 21/80 = **26.2%** | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 13/57 = **22.8%** | 14/58 = **24.1%** | 8/57 = **14.0%** | 1/58 = **1.7%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
-| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
-| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 3/14 = **21.4%** | 2/14 = **14.3%** |
-| Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — |
-| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
+| Bucket | Claude Opus 4.8 | GPT-4o | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16 | Qwen2.5-Coder-7B | CodeLlama-7B FP16 | GLM4-9B FP16 | GLM4-9B (4-bit) |
+|---|---|---|---|---|---|---|---|---|---|
+| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 36/80 = **45.0%** | 32/79 = **40.5%** | 21/80 = **26.2%** | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 13/57 = **22.8%** | 14/58 = **24.1%** | 8/57 = **14.0%** | 1/58 = **1.7%** | 3/57 = **5.3%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
+| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
+| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 5/14 = **35.7%** | 3/14 = **21.4%** | 2/14 = **14.3%** |
+| Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — | — |
+| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
+| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **25/151 = 16.6%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
 
 **Key findings:**
 - Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
@@ -74,6 +75,9 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 - Qwen2.5-Coder-14B scores **33.6%** — 2× the 7B but still well below GPT-4o; audit rules remain a clear weakness (24.1%).
 - CodeLlama-34B (FP16) scores **21.2%** — larger than Qwen-14B but noticeably weaker, underperforming even DeepSeek-Coder-33B by a wide margin despite comparable parameter count.
 - Qwen2.5-Coder-7B scores **14.6%** — nearly unable to write correct `auditd` rules (1.7%).
+- CodeLlama-7B (FP16) ties Qwen2.5-Coder-7B exactly at **14.6%** combined — its sshd score (35.7%)
+  is notably better than CodeLlama-34B's (21.4%), an unusual case of the smaller model in a family
+  outperforming the larger one on this specific bucket.
 - GLM4-9B scores **~13%** regardless of precision (FP16 vs 4-bit) — weakest model tested, essentially unable to write correct `auditd` rules (0-2%).
 - Claude scores **1.35× higher** than GPT-4o, **2.5× higher** than DeepSeek-Coder-33B, **2.6× higher** than Qwen 14B, **4.2× higher** than CodeLlama-34B, **6.1× higher** than Qwen 7B, and **~6.8× higher** than GLM4-9B.
 - Denominators are normalized to the standard **137 / 151** split (matching Claude/GPT-4o methodology) across every model. Where a run did not score every rule — either because a scoring host crashed mid-run (CodeLlama-34B, GLM4-9B FP16) or because the original published numbers used a smaller denominator (Qwen2.5-Coder-7B) — the unscored/missing rules are counted as failures rather than excluded, so percentages are directly comparable but may understate a model's true rate slightly.
@@ -246,6 +250,33 @@ concepts than RHEL8's (275 controls vs. 453 — a younger, less complete guide).
 168 scoreable rules have a matching rule in Ubuntu's STIG at all; the other 80 rely on RHEL-only
 mechanisms (SELinux, `authselect`) that don't exist on Ubuntu. The 88 aren't a subset we picked —
 they're every rule concept the two operating systems' official guides actually have in common.
+
+---
+
+### Cross-Author Prompt Validation (GPT-4o-authored)
+
+The main benchmark's task prompts were authored by Claude from the raw STIG metadata (title,
+severity, rationale, description), then checked for leakage. To test whether that authoring
+process — and its leak-free result — is specific to Claude or holds for an independently-authored
+prompt set, GPT-4o authored its own parallel prompt set from the exact same raw metadata, using the
+identical instructions and leak checker (`benchmark/generate_prompts_gpt.py`). GPT-4o's initial
+pass flagged 13/215 rows for possible leakage (vs. Claude's 0 genuine leaks); 6 were confirmed real
+mechanism leaks (exact file paths / config module names) and regenerated.
+
+Models are then run and scored against this GPT-4o-authored prompt set exactly as with the main
+benchmark — same harness, same AlmaLinux 8 host, same OVAL grading:
+
+| Model | Server config + kernel | Audit rules | sshd config | Combined server-safe | All verified applicable |
+|---|---|---|---|---|---|
+| GPT-4o | 44/80 = 55.0% | 29/57 = 50.9% | 11/14 = 78.6% | **73/137 = 53.3%** | **84/151 = 55.6%** |
+
+For comparison, GPT-4o's score on the original **Claude**-authored prompts (same underlying rules)
+is 65.7% (90/137) combined server-safe — notably *higher* than its 53.3% on its own authored
+prompts. GPT-4o performs worse solving prompts it effectively wrote for itself than prompts Claude
+wrote for it, at least by this measure — evidence the prompt-authoring model's identity affects
+downstream solve rates, not just which model is being benchmarked.
+
+Claude Opus 4.8's score on this same GPT-4o-authored prompt set is pending.
 
 ---
 
