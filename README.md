@@ -13,8 +13,10 @@ reference-script diffing — a compliance scanner is the oracle.
 >
 > | Model | Combined Server-Safe | All Verified Applicable |
 > |---|---|---|
-> | **Claude Opus 4.8** | **88.8%** (143/161) | **83.9%** (151/180) |
+> | **Claude Opus 4.8** | **88.8%** (143/161)\* | **83.9%** (151/180)\* |
+> | Claude Opus 4.7 | 81.0% (111/137) | 80.8% (122/151) |
 > | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
+> | Claude Sonnet 5 | 59.9% (82/137) | 58.9% (89/151) |
 > | DeepSeek-Coder-33B-Instruct FP16 (Ollama) | 35.8% (49/137) | 36.4% (55/151) |
 > | Qwen2.5-Coder-14B-Instruct | 33.6% (46/137) | 35.1% (53/151) |
 > | CodeLlama-34B-Instruct FP16 (Ollama) | 21.2% (29/137) | 21.2% (32/151) |
@@ -22,6 +24,11 @@ reference-script diffing — a compliance scanner is the oracle.
 > | CodeLlama-7B-Instruct FP16 (Ollama) | 14.6% (20/137) | 16.6% (25/151) |
 > | GLM4-9B FP16 (Ollama) | 13.1% (18/137) | 13.9% (21/151) |
 > | GLM4-9B (4-bit, Ollama) | 12.4% (17/137) | 12.6% (19/151) |
+>
+> \* Opus 4.8's denominator (161/180) comes from its original scoring pass, which excluded only 1
+> hazardous rule instead of the standard `--skip-hazardous` set — every other model here (including
+> Opus 4.7) uses the standard 137/151 basis. Not a strict apples-to-apples comparison at the top;
+> Opus 4.7's 81.0% is the highest score on the standard basis.
 >
 > Every row above is a single run (temp=0, greedy). A confidence-interval study re-running some
 > of these models multiple times is underway — see
@@ -58,19 +65,24 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 ### Model Comparison
 
-| Bucket | Claude Opus 4.8 | GPT-4o | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16 | Qwen2.5-Coder-7B | CodeLlama-7B FP16 | GLM4-9B FP16 | GLM4-9B (4-bit) |
-|---|---|---|---|---|---|---|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 54/79 = **68.4%** | 36/80 = **45.0%** | 32/79 = **40.5%** | 21/80 = **26.2%** | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 36/58 = **62.1%** | 13/57 = **22.8%** | 14/58 = **24.1%** | 8/57 = **14.0%** | 1/58 = **1.7%** | 3/57 = **5.3%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
-| **→ Combined server-safe** | **143/161 = 88.8%** | **90/137 = 65.7%** | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
-| sshd config | 8/15 = 53.3% | 10/14 = **71.4%** | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 5/14 = **35.7%** | 3/14 = **21.4%** | 2/14 = **14.3%** |
-| Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — | — |
-| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%** | **100/151 = 66.2%** | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **25/151 = 16.6%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
+| Bucket | Claude Opus 4.8 | Claude Opus 4.7 | GPT-4o | Claude Sonnet 5 | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16 | Qwen2.5-Coder-7B | CodeLlama-7B FP16 | GLM4-9B FP16 | GLM4-9B (4-bit) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Server config + kernel | 106/117 = **90.6%** | 71/80 = **88.8%** | 54/79 = **68.4%** | 49/80 = **61.2%**\*\* | 36/80 = **45.0%** | 32/79 = **40.5%** | 21/80 = **26.2%** | 19/79 = **24.1%** | 17/80 = **21.2%** | 17/80 = **21.2%** | 17/80 = **21.2%** |
+| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 40/57 = **70.2%** | 36/58 = **62.1%** | 33/57 = **57.9%**\*\* | 13/57 = **22.8%** | 14/58 = **24.1%** | 8/57 = **14.0%** | 1/58 = **1.7%** | 3/57 = **5.3%** | 1/57 = **1.8%** | 0/57 = **0.0%** |
+| **→ Combined server-safe** | **143/161 = 88.8%**\* | **111/137 = 81.0%** | **90/137 = 65.7%** | **82/137 = 59.9%**\*\* | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
+| sshd config | 8/15 = 53.3% | 11/14 = **78.6%** | 10/14 = **71.4%** | 7/14 = 50.0% | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 5/14 = **35.7%** | 3/14 = **21.4%** | 2/14 = **14.3%** |
+| Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — | — | — | — |
+| Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
+| **All verified applicable** | **151/180 = 83.9%**\* | **122/151 = 80.8%** | **100/151 = 66.2%** | **89/151 = 58.9%**\*\* | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **25/151 = 16.6%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
 
 **Key findings:**
 - Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
+- Claude Opus 4.7 scores **81.0%** on the standard 137/151 basis — the highest of any model measured
+  on that basis (Opus 4.8's 88.8% uses a larger, non-standard denominator from its original scoring
+  pass — see note above the headline table). Opus 4.7 is also the best of every model tested on sshd
+  (78.6%).
 - GPT-4o scores **65.7%** — solid mid-tier; notably best on sshd (71.4%) but weaker on audit rules (62.1%).
+- Claude Sonnet 5 scores **59.9%**\*\* — behind GPT-4o but well ahead of every open-source model.
 - DeepSeek-Coder-33B (FP16) scores **35.8%** — narrowly ahead of Qwen2.5-Coder-14B, with the strongest sshd score (42.9%) among open-source models.
 - Qwen2.5-Coder-14B scores **33.6%** — 2× the 7B but still well below GPT-4o; audit rules remain a clear weakness (24.1%).
 - CodeLlama-34B (FP16) scores **21.2%** — larger than Qwen-14B but noticeably weaker, underperforming even DeepSeek-Coder-33B by a wide margin despite comparable parameter count.
@@ -81,6 +93,9 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 - GLM4-9B scores **~13%** regardless of precision (FP16 vs 4-bit) — weakest model tested, essentially unable to write correct `auditd` rules (0-2%).
 - Claude scores **1.35× higher** than GPT-4o, **2.5× higher** than DeepSeek-Coder-33B, **2.6× higher** than Qwen 14B, **4.2× higher** than CodeLlama-34B, **6.1× higher** than Qwen 7B, and **~6.8× higher** than GLM4-9B.
 - Denominators are normalized to the standard **137 / 151** split (matching Claude/GPT-4o methodology) across every model. Where a run did not score every rule — either because a scoring host crashed mid-run (CodeLlama-34B, GLM4-9B FP16) or because the original published numbers used a smaller denominator (Qwen2.5-Coder-7B) — the unscored/missing rules are counted as failures rather than excluded, so percentages are directly comparable but may understate a model's true rate slightly.
+- \*\* Sonnet 5 only produced a usable script for 148 of the 168 standard rules (20 responses had no
+  parseable bash block: 13 in server config, 7 in audit). Those 20 are counted as failures against
+  the standard 80/57 sub-denominators, same normalization as above.
 
 Scanner: OpenSCAP 1.3.14 · SSG 0.1.81 `stig` profile · Host: AlmaLinux 8 (RHEL-8
 binary-compatible, headless server).
@@ -269,14 +284,16 @@ benchmark — same harness, same AlmaLinux 8 host, same OVAL grading:
 | Model | Server config + kernel | Audit rules | sshd config | Combined server-safe | All verified applicable |
 |---|---|---|---|---|---|
 | GPT-4o | 44/80 = 55.0% | 29/57 = 50.9% | 11/14 = 78.6% | **73/137 = 53.3%** | **84/151 = 55.6%** |
+| Claude Opus 4.8 | 61/80 = 76.2% | 40/57 = 70.2% | 9/14 = 64.3% | **101/137 = 73.7%** | **110/151 = 72.8%** |
 
-For comparison, GPT-4o's score on the original **Claude**-authored prompts (same underlying rules)
-is 65.7% (90/137) combined server-safe — notably *higher* than its 53.3% on its own authored
-prompts. GPT-4o performs worse solving prompts it effectively wrote for itself than prompts Claude
-wrote for it, at least by this measure — evidence the prompt-authoring model's identity affects
-downstream solve rates, not just which model is being benchmarked.
-
-Claude Opus 4.8's score on this same GPT-4o-authored prompt set is pending.
+For comparison, on the original **Claude**-authored prompts (same underlying rules), GPT-4o scores
+65.7% (90/137) and Opus scores 88.8% — both *higher* than their scores on the GPT-4o-authored set
+(53.3% and 73.7% respectively). That's the same direction for both models, not a self-vs-other
+effect: neither model does better on the prompts it effectively wrote for itself. GPT-4o actually
+does *worse* on its own authored prompts than on Claude's. The consistent pattern is that
+Claude-authored prompts yield higher solve rates from both solvers — evidence the prompt set's own
+clarity/specificity matters more here than any relationship between the authoring model and the
+solving model.
 
 ---
 
