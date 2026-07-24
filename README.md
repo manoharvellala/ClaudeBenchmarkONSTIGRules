@@ -13,8 +13,8 @@ reference-script diffing — a compliance scanner is the oracle.
 >
 > | Model | Combined Server-Safe | All Verified Applicable |
 > |---|---|---|
-> | **Claude Opus 4.8** | **88.8%** (143/161)\* | **83.9%** (151/180)\* |
 > | Claude Opus 4.7 | 81.0% (111/137) | 80.8% (122/151) |
+> | **Claude Opus 4.8** | **77.4%** (106/137) | **76.8%** (116/151) |
 > | Claude Sonnet 4.5 | 76.6% (105/137) | 75.5% (114/151) |
 > | Claude Opus 4.5 | 75.9% (104/137) | 72.8% (110/151) |
 > | GPT-4o | 65.7% (90/137) | 66.2% (100/151) |
@@ -28,10 +28,10 @@ reference-script diffing — a compliance scanner is the oracle.
 > | GLM4-9B FP16 (Ollama) | 13.1% (18/137) | 13.9% (21/151) |
 > | GLM4-9B (4-bit, Ollama) | 12.4% (17/137) | 12.6% (19/151) |
 >
-> \* Opus 4.8's denominator (161/180) comes from its original scoring pass, which excluded only 1
-> hazardous rule instead of the standard `--skip-hazardous` set — every other model here (including
-> Opus 4.7) uses the standard 137/151 basis. Not a strict apples-to-apples comparison at the top;
-> Opus 4.7's 81.0% is the highest score on the standard basis.
+> Opus 4.8 was re-scored on the standard `--skip-hazardous` basis (137/151), matching every other
+> model — its original run used a wider, non-standard scope (see
+> **[Claude Opus 4.8 — Full Breakdown](#claude-opus-48--full-breakdown)** below for that original
+> methodology). On the standard basis, Opus 4.7 is actually the highest-scoring model.
 >
 > Every row above is a single run (temp=0, greedy). A confidence-interval study re-running some
 > of these models multiple times is underway — see
@@ -70,24 +70,24 @@ API key / GPU). That makes runs cheap to repeat and lets you benchmark any model
 
 | Bucket | Claude Opus 4.8 | Claude Opus 4.7 | Claude Sonnet 4.5 | Claude Opus 4.5 | GPT-4o | Claude Sonnet 5 | Claude Haiku 4.5 | DeepSeek-Coder-33B FP16 | Qwen2.5-Coder-14B | CodeLlama-34B FP16 | Qwen2.5-Coder-7B | CodeLlama-7B FP16 | GLM4-9B FP16 | GLM4-9B (4-bit) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Server config + kernel | 106/117 = **90.6%** | 70/79 = **88.6%** | 58/79 = **73.4%** | 66/79 = **83.5%** | 54/79 = **68.4%** | 48/79 = **60.8%**\*\* | 49/79 = **62.0%** | 35/79 = **44.3%** | 32/79 = **40.5%** | 20/79 = **25.3%** | 19/79 = **24.1%** | 16/79 = **20.3%** | 16/79 = **20.3%** | 17/79 = **21.5%** |
-| Audit rules (`audit_rules_*`) | 37/44 = **84.1%** | 41/58 = **70.7%** | 47/58 = **81.0%** | 38/58 = **65.5%** | 36/58 = **62.1%** | 34/58 = **58.6%**\*\* | 21/58 = **36.2%** | 14/58 = **24.1%** | 14/58 = **24.1%** | 9/58 = **15.5%** | 1/58 = **1.7%** | 4/58 = **6.9%** | 2/58 = **3.4%** | 0/58 = **0.0%** |
-| **→ Combined server-safe** | **143/161 = 88.8%**\* | **111/137 = 81.0%** | **105/137 = 76.6%** | **104/137 = 75.9%** | **90/137 = 65.7%** | **82/137 = 59.9%**\*\* | **70/137 = 51.1%** | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
-| sshd config | 8/15 = 53.3% | 11/14 = **78.6%** | 9/14 = **64.3%** | 6/14 = **42.9%** | 10/14 = **71.4%** | 7/14 = 50.0% | 6/14 = **42.9%** | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 5/14 = **35.7%** | 3/14 = **21.4%** | 2/14 = **14.3%** |
-| Crypto / FIPS | 0/4 = 0% | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| Server config + kernel | 65/79 = **82.3%** | 70/79 = **88.6%** | 58/79 = **73.4%** | 66/79 = **83.5%** | 54/79 = **68.4%** | 48/79 = **60.8%**\*\* | 49/79 = **62.0%** | 35/79 = **44.3%** | 32/79 = **40.5%** | 20/79 = **25.3%** | 19/79 = **24.1%** | 16/79 = **20.3%** | 16/79 = **20.3%** | 17/79 = **21.5%** |
+| Audit rules (`audit_rules_*`) | 41/58 = **70.7%** | 41/58 = **70.7%** | 47/58 = **81.0%** | 38/58 = **65.5%** | 36/58 = **62.1%** | 34/58 = **58.6%**\*\* | 21/58 = **36.2%** | 14/58 = **24.1%** | 14/58 = **24.1%** | 9/58 = **15.5%** | 1/58 = **1.7%** | 4/58 = **6.9%** | 2/58 = **3.4%** | 0/58 = **0.0%** |
+| **→ Combined server-safe** | **106/137 = 77.4%** | **111/137 = 81.0%** | **105/137 = 76.6%** | **104/137 = 75.9%** | **90/137 = 65.7%** | **82/137 = 59.9%**\*\* | **70/137 = 51.1%** | **49/137 = 35.8%** | **46/137 = 33.6%** | **29/137 = 21.2%** | **20/137 = 14.6%** | **20/137 = 14.6%** | **18/137 = 13.1%** | **17/137 = 12.4%** |
+| sshd config | 10/14 = **71.4%** | 11/14 = **78.6%** | 9/14 = **64.3%** | 6/14 = **42.9%** | 10/14 = **71.4%** | 7/14 = 50.0% | 6/14 = **42.9%** | 6/14 = **42.9%** | 7/14 = 50.0% | 3/14 = **21.4%** | 4/14 = 28.6% | 5/14 = **35.7%** | 3/14 = **21.4%** | 2/14 = **14.3%** |
 | Not applicable (GUI / no hardware) | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded | 17 excluded |
-| **All verified applicable** | **151/180 = 83.9%**\* | **122/151 = 80.8%** | **114/151 = 75.5%** | **110/151 = 72.8%** | **100/151 = 66.2%** | **89/151 = 58.9%**\*\* | **76/151 = 50.3%** | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **25/151 = 16.6%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
+| **All verified applicable** | **116/151 = 76.8%** | **122/151 = 80.8%** | **114/151 = 75.5%** | **110/151 = 72.8%** | **100/151 = 66.2%** | **89/151 = 58.9%**\*\* | **76/151 = 50.3%** | **55/151 = 36.4%** | **53/151 = 35.1%** | **32/151 = 21.2%** | **24/151 = 15.9%** | **25/151 = 16.6%** | **21/151 = 13.9%** | **19/151 = 12.6%** |
 
 **Key findings:**
-- Claude Opus 4.8 leads at **88.8%** — strongest on both server config (90.6%) and audit rules (84.1%).
-- Claude Opus 4.7 scores **81.0%** on the standard 137/151 basis — the highest of any model measured
-  on that basis (Opus 4.8's 88.8% uses a larger, non-standard denominator from its original scoring
-  pass — see note above the headline table). Opus 4.7 is also the best of every model tested on sshd
-  (78.6%).
-- Claude Sonnet 4.5 scores **76.6%** and Claude Opus 4.5 scores **75.9%** — both close behind Opus
-  4.7, and Sonnet 4.5 actually edges out Opus 4.5 here, the only case in this study where a Sonnet
-  model outscores an Opus model. Sonnet 4.5 also posts the second-best audit-rules score of any
-  model (81.0%, behind only Opus 4.8's 84.1%).
+- Claude Opus 4.7 leads at **81.0%** on the standard 137/151 basis — the highest combined score of
+  any model in this study. Opus 4.7 is also the best of every model tested on sshd (78.6%).
+- Claude Opus 4.8 scores **77.4%** — now on the identical standard basis as every other model (see
+  note above the headline table for why its original run used a different, larger denominator).
+  Somewhat counterintuitively, Opus 4.8 doesn't lead the family it belongs to: Opus 4.7 (81.0%) and
+  even Sonnet 4.5 (76.6%) score close behind or ahead of it on this basis.
+- Claude Sonnet 4.5 scores **76.6%** and Claude Opus 4.5 scores **75.9%** — both close to the top,
+  and Sonnet 4.5 edges out Opus 4.5 here, the only case in this study where a Sonnet model
+  outscores an Opus model. Sonnet 4.5 also posts the **highest audit-rules score of any model
+  tested** (81.0%) — ahead of both Opus 4.8 and Opus 4.7 (70.7% each) and Opus 4.5 (65.5%).
 - GPT-4o scores **65.7%** — solid mid-tier; notably best on sshd (71.4%) but weaker on audit rules (62.1%).
 - Claude Sonnet 5 scores **59.9%**\*\* — behind GPT-4o but well ahead of every open-source model.
 - Claude Haiku 4.5 scores **51.1%** — the smallest/cheapest Claude model tested, but still comfortably ahead of every open-source model.
@@ -299,7 +299,7 @@ benchmark — same harness, same AlmaLinux 8 host, same OVAL grading:
 | Claude Opus 4.8 | 60/79 = 75.9% | 41/58 = 70.7% | 9/14 = 64.3% | **101/137 = 73.7%** | **110/151 = 72.8%** |
 
 For comparison, on the original **Claude**-authored prompts (same underlying rules), GPT-4o scores
-65.7% (90/137) and Opus scores 88.8% — both *higher* than their scores on the GPT-4o-authored set
+65.7% (90/137) and Opus scores 77.4% (106/137) — both *higher* than their scores on the GPT-4o-authored set
 (53.3% and 73.7% respectively). That's the same direction for both models, not a self-vs-other
 effect: neither model does better on the prompts it effectively wrote for itself. GPT-4o actually
 does *worse* on its own authored prompts than on Claude's. The consistent pattern is that
@@ -483,10 +483,13 @@ skill profile required (auditd syntax, sysctl, PAM, sshd_config, GRUB, kernel mo
 
 ## Caveats
 
-1. **Crypto/FIPS rules (0/4 verified) are an infrastructure artifact, not a model failure.** They
-   restrict SSH ciphers and lock you out mid-run. Scoring them fairly needs per-rule snapshot revert.
-2. **sshd (53%) is partly contaminated** — crypto rules can break sshd config when run on the same
-   host. Use `--skip-hazardous` to isolate.
+1. **Crypto/FIPS rules are excluded from the standard basis (`--skip-hazardous`), not a model
+   failure.** They restrict SSH ciphers and can lock you out mid-run. Scoring them fairly needs
+   per-rule snapshot revert; Opus 4.8's original wider-scope run, which did score them, found 0/4
+   passed (see **Full Breakdown** below).
+2. **sshd contamination is why every model is scored with `--skip-hazardous`** — crypto rules can
+   break sshd config when run on the same host. Opus 4.8's original run scored both on the same box
+   and got sshd 53.3% (8/15); re-scored on the standard, isolated basis it's 71.4% (10/14).
 3. **Single host, no snapshot revert** → some cross-rule interaction is possible.
 4. The result characterizes **the model on the RHEL-8 STIG via blind/mechanism-hidden prompts.** A
    value-injected variant (handing the model the exact `xccdf_value`) would separately measure
